@@ -17,7 +17,7 @@ For a Flue agent, import it:
 import daddyChill from './skills/daddy-chill/SKILL.md' with { type: 'skill' };
 
 export default defineAgent(() => ({
-	model: 'anthropic/claude-sonnet-5',
+	model: 'openrouter/anthropic/claude-sonnet-5',
 	skills: [daddyChill],
 }));
 ```
@@ -48,7 +48,7 @@ it passes on length.
 ## Run it
 
 ```sh
-cp .env.example .env      # then add your ANTHROPIC_API_KEY
+cp .env.example .env      # then add your OPENROUTER_API_KEY
 pnpm install
 pnpm dev                  # terminal 1: starts the Flue server
 pnpm evals                # terminal 2: runs the benchmark
@@ -61,8 +61,20 @@ pnpm test                 # unit tests for the scoring code, no API key needed
 pnpm typecheck
 pnpm evals:json           # writes vitest-results.json
 pnpm exec vitest-evals serve vitest-results.json   # browse the report
-EVAL_MODEL=anthropic/claude-opus-5 pnpm dev        # benchmark a different model
+EVAL_MODEL=openrouter/anthropic/claude-opus-4.8 pnpm dev   # benchmark a different model
 ```
+
+Models run through [OpenRouter](https://openrouter.ai), so `EVAL_MODEL` is
+`openrouter/` plus an OpenRouter slug — `openrouter/openai/gpt-5.5`,
+`openrouter/moonshotai/kimi-k2.6`, and so on. One key, many models.
+
+One caveat: the slug must be in the model catalog Flue bundles via
+`@earendil-works/pi-ai`, and that catalog lags OpenRouter's live list.
+`anthropic/claude-opus-5` is on OpenRouter today but is not in the bundled
+catalog, so it will not resolve. Verified working slugs at the pinned version
+include `anthropic/claude-sonnet-5`, `anthropic/claude-opus-4.8`, and
+`anthropic/claude-haiku-4.5`. See [Pi's provider docs](https://pi.dev/docs/latest/providers)
+for the full catalog.
 
 ## Notes on the measurement
 
