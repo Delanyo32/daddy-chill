@@ -1,3 +1,6 @@
+// text-readability@1.1.1 ships without TypeScript declarations.
+// Keep this suppression next to the import so it can be removed if that changes.
+// @ts-expect-error -- untyped third-party package
 import rs from 'text-readability';
 
 export interface Metrics {

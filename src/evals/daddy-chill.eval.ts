@@ -35,6 +35,7 @@ describeEval('daddy-chill lowers reading level without losing the answer', { har
 			expect(after.words, 'concision vs baseline').toBeLessThan(before.words);
 			expect(after.difficultRatio, 'jargon vs baseline').toBeLessThan(before.difficultRatio);
 			expect(after.avgSentenceLength, 'sentence length ceiling').toBeLessThanOrEqual(SENTENCE_CEILING);
+			expect(skilled.output, 'no em dashes').not.toContain('—');
 		});
 	}
 });

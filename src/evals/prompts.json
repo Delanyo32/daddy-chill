@@ -8,5 +8,10 @@
 	"Explain what a database index and what are some downsides of using it",
 	"What is the difference between git rebase and git merge?",
 	"How does garbage collection work and how is rusts implementation different?",
-	"Explain how turbopuffer implements it search. here is the repo https://github.com/turbopuffer/turbopuffer-python"
+	"Explain how turbopuffer implements it search. here is the repo https://github.com/turbopuffer/turbopuffer-python",
+	"Write a short email explaining that a software deploy is delayed.",
+	"Write a brief customer update about a short service outage.",
+	"Write a five-step setup guide for a new developer joining a project.",
+	"Rewrite a dense technical explanation for someone without a technical background.",
+	"Write a concise code review comment explaining why a change needs updates."
 ]

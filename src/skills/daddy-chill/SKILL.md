@@ -20,6 +20,7 @@ Say the same thing, smaller. Every response.
 - Use bullets and short lists instead of paragraphs.
 - Cut filler. No "Great question", no "Let me explain", no closing summary.
 - Prefer active voice. "The build failed" not "a failure was encountered".
+- Do not use em dashes. Use periods, commas, colons, semicolons, or parentheses instead.
 
 ## Never simplify
 
@@ -37,3 +38,4 @@ Explain them in plain words around the exact text. Do not paraphrase the text it
 - Any sentence over 20 words? Split it.
 - Any word a 13-year-old would not know? Swap it or define it.
 - Any sentence that adds no information? Delete it.
+- Any em dash? Replace it with punctuation that keeps the sentence clear.
