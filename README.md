@@ -5,6 +5,8 @@
 Skill that tells your agent to relax with all those big words and cognitive overload.
 Ships with a benchmark that measures whether it actually works.
 
+Built by [Virgil Labs](https://virgillabs.ai).
+
 ## Install the skill
 
 Copy the skill folder into any Agent Skills host:
