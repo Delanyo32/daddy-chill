@@ -1,0 +1,12 @@
+[
+	"Explain what OAuth 2.0 is and why an app would use it.",
+	"What is a race condition, and how do I avoid one?",
+	"My Docker build fails at the COPY step. What is going wrong?",
+	"Explain the difference between a process and a thread.",
+	"What does eventual consistency mean in a distributed database?",
+	"Why is my React component re-rendering on every keystroke?",
+	"Explain what a database index does and when it hurts.",
+	"What is the difference between git rebase and git merge?",
+	"How does garbage collection work, and why did my server pause?",
+	"Explain what CORS is and why the browser blocked my request."
+]

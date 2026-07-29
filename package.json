@@ -1,0 +1,28 @@
+{
+  "name": "daddy-chill",
+  "version": "1.0.0",
+  "description": "An Agent Skill that pins AI output to an 8th-grade reading level, with a benchmark that proves it.",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "dev": "flue dev",
+    "test": "vitest run src/evals/metrics.test.ts",
+    "typecheck": "tsc --noEmit",
+    "evals": "vitest run --config vitest.evals.config.ts",
+    "evals:json": "vitest run --config vitest.evals.config.ts --reporter=vitest-evals/reporter --reporter=json --outputFile.json=vitest-results.json"
+  },
+  "license": "MIT",
+  "packageManager": "pnpm@10.14.0",
+  "dependencies": {
+    "@flue/runtime": "1.0.0-beta.9"
+  },
+  "devDependencies": {
+    "@flue/cli": "1.0.0-beta.9",
+    "@flue/sdk": "1.0.0-beta.9",
+    "@types/node": "^22.20.1",
+    "text-readability": "^1.1.1",
+    "typescript": "^7.0.2",
+    "vitest": "^4.1.10",
+    "vitest-evals": "^0.15.0"
+  }
+}
