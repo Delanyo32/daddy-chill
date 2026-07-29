@@ -4,6 +4,7 @@ export default defineConfig({
 	test: {
 		include: ['src/evals/**/*.eval.ts'],
 		reporters: ['default', 'vitest-evals/reporter'],
-		testTimeout: 120_000,
+		// Both arms may fetch several pages per prompt before answering.
+		testTimeout: 300_000,
 	},
 });

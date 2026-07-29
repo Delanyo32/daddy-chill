@@ -78,6 +78,35 @@ include `anthropic/claude-sonnet-5`, `anthropic/claude-opus-4.8`, and
 `anthropic/claude-haiku-4.5`. See [Pi's provider docs](https://pi.dev/docs/latest/providers)
 for the full catalog.
 
+## Web access
+
+Both agents share one virtual sandbox (`src/shared/sandbox.ts`), so the skill stays
+the only difference between them. Several prompts name a repo URL or need current
+information, so the sandbox has the network switched on.
+
+What the agents actually get:
+
+- `curl` and `wget`, usually piped through `html-to-markdown` to read a page
+- the rest of just-bash: `cat`, `grep`, `rg`, `sed`, `awk`, `jq`, `python3`, `sqlite3`
+- an empty in-memory workspace at `/workspace`, gone when the session ends
+
+What they do **not** get: no web search command, and no `git`. Repositories have to
+be read through `raw.githubusercontent.com` or the GitHub API.
+
+Two deliberate ceilings, both marked in the source:
+
+1. Full internet access also permits POST/PUT/DELETE, not just GET/HEAD. The
+   `dangerouslyAllowFullInternetAccess` flag overrides `allowedMethods`.
+2. Private ranges stay reachable, including the Flue dev server on `127.0.0.1:3583`.
+   `denyPrivateRanges: true` is the intended fix, but on Node 22 it makes every
+   request fail with `DNS pinning unavailable for private IP enforcement`
+   (just-bash 3.2.0), so it is off rather than silently breaking all fetches.
+
+Both are fine for a local benchmark against public docs with no credentials in the
+workspace. If you ever point this at untrusted input, replace the flag with an
+explicit `allowedUrlPrefixes` list — that restores the GET/HEAD default and makes
+private ranges unreachable by omission.
+
 ## Notes on the measurement
 
 - **Markdown is stripped before scoring.** `src/evals/metrics.ts` converts markdown to
@@ -91,3 +120,7 @@ for the full catalog.
   do not move, check the skill's `description` before blaming its rules.
 - **Per-prompt asserts on LLM output can be flaky.** If they prove noisy, switch the
   gates to medians across all 10 prompts rather than loosening the thresholds.
+- **A refusal scores well.** "I could not fetch that page" is short, plain, and grades
+  low, so it passes every gate while answering nothing. The gates measure readability,
+  not correctness. If fetches start failing, the benchmark will look healthy — read the
+  logged before/after text, not just the pass count.

@@ -6,7 +6,7 @@
   "private": true,
   "scripts": {
     "dev": "flue dev",
-    "test": "vitest run src/evals/metrics.test.ts",
+    "test": "vitest run src/evals/metrics.test.ts src/shared/sandbox.test.ts",
     "typecheck": "tsc --noEmit",
     "evals": "vitest run --config vitest.evals.config.ts",
     "evals:json": "vitest run --config vitest.evals.config.ts --reporter=vitest-evals/reporter --reporter=json --outputFile.json=vitest-results.json"
@@ -14,7 +14,8 @@
   "license": "MIT",
   "packageManager": "pnpm@10.14.0",
   "dependencies": {
-    "@flue/runtime": "1.0.0-beta.9"
+    "@flue/runtime": "1.0.0-beta.9",
+    "just-bash": "^3.2.0"
   },
   "devDependencies": {
     "@flue/cli": "1.0.0-beta.9",
