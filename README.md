@@ -1,5 +1,7 @@
 # daddy-chill
 
+<img src="daddy-chill.gif" alt="Daddy chill" width="360">
+
 An Agent Skill that keeps AI answers at an 8th-grade reading level: short, plain, concise.
 Ships with a benchmark that measures whether it actually works.
 
