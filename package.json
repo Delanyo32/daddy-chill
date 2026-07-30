@@ -20,7 +20,7 @@
   "type": "module",
   "main": "./.opencode/plugins/daddy-chill.mjs",
   "bin": {
-    "daddy-chill": "./install.mjs"
+    "daddy-chill": "install.mjs"
   },
   "files": [
     ".claude-plugin/",
@@ -43,10 +43,18 @@
   "exports": {
     ".": "./.opencode/plugins/daddy-chill.mjs"
   },
-  "keywords": ["pi-package", "agent-skill", "daddy-chill"],
+  "keywords": [
+    "pi-package",
+    "agent-skill",
+    "daddy-chill"
+  ],
   "pi": {
-    "extensions": ["./pi-extension/index.js"],
-    "skills": ["./skills"]
+    "extensions": [
+      "./pi-extension/index.js"
+    ],
+    "skills": [
+      "./skills"
+    ]
   },
   "scripts": {
     "dev": "flue dev",
