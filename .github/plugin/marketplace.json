@@ -1,0 +1,17 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "daddy-chill",
+  "description": "Plain, concise response style for AI coding agents.",
+  "owner": {
+    "name": "Delanyo32",
+    "url": "https://github.com/Delanyo32"
+  },
+  "plugins": [
+    {
+      "name": "daddy-chill",
+      "description": "Keep agent responses plain, concise, and easy to read.",
+      "source": "./",
+      "category": "productivity"
+    }
+  ]
+}

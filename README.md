@@ -7,13 +7,65 @@ Ships with a benchmark that measures whether it actually works.
 
 Built by [Virgil Labs](https://virgillabs.ai).
 
-## Install the skill
+## Install
 
-Copy the skill folder into any Agent Skills host:
+### Full plugin install
+
+After publishing the npm package, users run:
 
 ```sh
-cp -r src/skills/daddy-chill ~/.claude/skills/
+npx daddy-chill install
 ```
+
+The installer detects supported CLIs and asks which ones to install. It asks for global or project scope too.
+
+For a non-interactive global install:
+
+```sh
+npx daddy-chill install --global --all --yes
+```
+
+Install one host:
+
+```sh
+npx daddy-chill install --global --agent claude --yes
+```
+
+The local development equivalent is:
+
+```sh
+node install.mjs install --global --all --yes
+```
+
+Use `--link` for a symlink. Copies are the default.
+
+To publish a new package version:
+
+```sh
+npm login
+npm version patch
+npm publish
+```
+
+Run `npm run package:check` first to inspect the package contents.
+
+Remove it later:
+
+```sh
+npx daddy-chill uninstall --global --all --yes
+```
+
+Supported adapters are Claude Code, Gemini CLI, OpenCode, and pi. Restart each CLI after installation.
+
+### Portable skill
+
+Install the skill with the [Vercel Skills CLI](https://github.com/vercel-labs/skills):
+
+```sh
+npx skills add Delanyo32/daddy-chill --skill daddy-chill
+```
+
+Add `-g` for a global install. This installs the skill, but does not provide always-on activation or slash-command state.
 
 ## How the benchmark works
 

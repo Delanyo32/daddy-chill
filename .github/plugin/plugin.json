@@ -1,0 +1,11 @@
+{
+  "name": "daddy-chill",
+  "description": "Keep agent responses plain, concise, and easy to read.",
+  "version": "1.0.0",
+  "homepage": "https://github.com/Delanyo32/daddy-chill",
+  "repository": "https://github.com/Delanyo32/daddy-chill",
+  "license": "MIT",
+  "commands": "commands/",
+  "skills": "skills/",
+  "hooks": "hooks/copilot-hooks.json"
+}

@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin.json",
+  "name": "daddy-chill",
+  "displayName": "Daddy Chill",
+  "version": "1.0.0",
+  "description": "Keep agent responses plain, concise, and easy to read.",
+  "author": {
+    "name": "Virgil Labs",
+    "url": "https://virgillabs.ai"
+  },
+  "homepage": "https://github.com/Delanyo32/daddy-chill",
+  "repository": "https://github.com/Delanyo32/daddy-chill",
+  "license": "MIT",
+  "keywords": ["plain-language", "readability", "concise"],
+  "skills": "./skills/",
+  "commands": "./commands/",
+  "hooks": "./hooks/hooks.json"
+}

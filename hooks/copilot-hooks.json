@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "hooks": {
+    "sessionStart": [
+      {
+        "type": "command",
+        "bash": "node \"${PLUGIN_ROOT}/hooks/copilot-session-start.mjs\"",
+        "powershell": "node \"${PLUGIN_ROOT}\\hooks\\copilot-session-start.mjs\"",
+        "timeoutSec": 5
+      }
+    ],
+    "userPromptSubmitted": [
+      {
+        "type": "command",
+        "bash": "node \"${PLUGIN_ROOT}/hooks/copilot-prompt-submit.mjs\"",
+        "powershell": "node \"${PLUGIN_ROOT}\\hooks\\copilot-prompt-submit.mjs\"",
+        "timeoutSec": 5
+      }
+    ]
+  }
+}

@@ -1,0 +1,2 @@
+description = "Turn Daddy Chill on, turn it off, or show its current status."
+prompt = "Process the Daddy Chill command: {{args}}. Valid modes are on, off, and status. Report the state briefly."

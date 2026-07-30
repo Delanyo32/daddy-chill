@@ -2,10 +2,58 @@
   "name": "daddy-chill",
   "version": "1.0.0",
   "description": "An Agent Skill that pins AI output to an 8th-grade reading level, with a benchmark that proves it.",
+  "author": {
+    "name": "Virgil Labs",
+    "url": "https://virgillabs.ai"
+  },
+  "homepage": "https://github.com/Delanyo32/daddy-chill",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Delanyo32/daddy-chill.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Delanyo32/daddy-chill/issues"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
   "type": "module",
-  "private": true,
+  "main": "./.opencode/plugins/daddy-chill.mjs",
+  "bin": {
+    "daddy-chill": "./install.mjs"
+  },
+  "files": [
+    ".claude-plugin/",
+    ".codex-plugin/",
+    ".github/plugin/",
+    ".opencode/",
+    "commands/",
+    "GEMINI.md",
+    "gemini-extension.json",
+    "hooks/",
+    "install.mjs",
+    "opencode.json",
+    "pi-extension/",
+    "runtime/",
+    "skills/"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "exports": {
+    ".": "./.opencode/plugins/daddy-chill.mjs"
+  },
+  "keywords": ["pi-package", "agent-skill", "daddy-chill"],
+  "pi": {
+    "extensions": ["./pi-extension/index.js"],
+    "skills": ["./skills"]
+  },
   "scripts": {
     "dev": "flue dev",
+    "package:check": "npm pack --dry-run",
+    "publish:dry": "npm pack --dry-run",
+    "install:local": "node install.mjs install --global",
+    "uninstall:local": "node install.mjs uninstall --global",
     "test": "vitest run src/evals/metrics.test.ts src/shared/sandbox.test.ts",
     "typecheck": "tsc --noEmit",
     "evals": "vitest run --config vitest.evals.config.ts",
@@ -13,11 +61,9 @@
   },
   "license": "MIT",
   "packageManager": "pnpm@10.14.0",
-  "dependencies": {
-    "@flue/runtime": "1.0.0-beta.9",
-    "just-bash": "^3.2.0"
-  },
   "devDependencies": {
+    "@flue/runtime": "1.0.0-beta.9",
+    "just-bash": "^3.2.0",
     "@flue/cli": "1.0.0-beta.9",
     "@flue/sdk": "1.0.0-beta.9",
     "@types/node": "^22.20.1",

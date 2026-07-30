@@ -1,0 +1,41 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup|resume|clear|compact|fork",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/claude-session-start.mjs\"",
+            "timeout": 5,
+            "statusMessage": "Loading Daddy Chill..."
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/claude-prompt-submit.mjs\"",
+            "timeout": 5,
+            "statusMessage": "Checking Daddy Chill mode..."
+          }
+        ]
+      }
+    ],
+    "SubagentStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/claude-subagent-start.mjs\"",
+            "timeout": 5,
+            "statusMessage": "Loading Daddy Chill for subagent..."
+          }
+        ]
+      }
+    ]
+  }
+}

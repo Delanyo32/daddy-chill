@@ -1,0 +1,9 @@
+{
+  "name": "daddy-chill-pi",
+  "private": true,
+  "type": "module",
+  "pi": {
+    "extensions": ["./index.js"],
+    "skills": ["../skills"]
+  }
+}
