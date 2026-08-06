@@ -62,7 +62,7 @@
     "publish:dry": "npm pack --dry-run",
     "install:local": "node install.mjs install --global",
     "uninstall:local": "node install.mjs uninstall --global",
-    "test": "vitest run src/evals/metrics.test.ts src/shared/sandbox.test.ts",
+    "test": "vitest run src/evals/metrics.test.ts src/evals/retention.test.ts src/shared/rules.test.ts src/shared/sandbox.test.ts",
     "typecheck": "tsc --noEmit",
     "evals": "vitest run --config vitest.evals.config.ts",
     "evals:json": "vitest run --config vitest.evals.config.ts --reporter=vitest-evals/reporter --reporter=json --outputFile.json=vitest-results.json"

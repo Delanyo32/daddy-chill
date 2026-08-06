@@ -42,3 +42,8 @@ export function createFlueAgentHarness(options: { agentName: string }) {
 export async function promptPlainAgent(input: string, signal?: AbortSignal): Promise<string> {
 	return (await prompt('plain', input, signal)).text;
 }
+
+/** The ruler. Not an arm of the benchmark, so it does not run through a harness either. */
+export async function promptJudgeAgent(input: string, signal?: AbortSignal): Promise<string> {
+	return (await prompt('judge', input, signal)).text;
+}

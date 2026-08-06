@@ -1,12 +1,11 @@
----
-name: daddy-chill
-description: Use for every response. Writes answers at an 8th-grade reading level in short, plain, concise language, following Simplified Technical English rules. Use when the user asks for simpler wording, plain English, less jargon, shorter answers, or says "daddy chill", and as the default style for all explanations, summaries, reviews, and answers.
-license: MIT
-metadata:
-  target-grade: "8"
----
-
-# Daddy Chill
+/**
+ * The daddy-chill rules, verbatim from skills/daddy-chill/SKILL.md.
+ *
+ * The benchmark agent cannot import SKILL.md as text: flue resolves that path to
+ * a SkillReference, which carries only id, name, and description. So the body is
+ * copied here, and rules.test.ts fails if the copy drifts from the file.
+ */
+export const SKILL_BODY = `# Daddy Chill
 
 Say the same thing, smaller. Every response.
 
@@ -55,4 +54,12 @@ Explain them in plain words around the exact text. Do not paraphrase the text it
 - Any word a 13-year-old would not know? Swap it or define it.
 - Any sentence that adds no information? Delete it.
 - Any item you dropped instead of shortening? Put it back.
-- Any em dash? Replace it with punctuation that keeps the sentence clear.
+- Any em dash? Replace it with punctuation that keeps the sentence clear.`;
+
+/** What the treatment agent gets. The skill is on before the first token. */
+export const ALWAYS_ON_INSTRUCTIONS = [
+	'The daddy-chill style is already active. Apply these rules to every response.',
+	'Do not decide whether to load or activate the skill.',
+	'',
+	SKILL_BODY,
+].join('\n');

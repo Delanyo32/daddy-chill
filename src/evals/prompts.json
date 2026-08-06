@@ -13,5 +13,10 @@
 	"Write a brief customer update about a short service outage.",
 	"Write a five-step setup guide for a new developer joining a project.",
 	"Rewrite a dense technical explanation for someone without a technical background.",
-	"Write a concise code review comment explaining why a change needs updates."
+	"Write a concise code review comment explaining why a change needs updates.",
+	"Write the steps to rotate an API key that was leaked in a public commit.",
+	"Write a runbook for restoring a Postgres database from last night's backup.",
+	"Write a warning notice for a script that deletes every file in a directory.",
+	"Write the steps to roll back a bad deploy on Kubernetes.",
+	"Write install steps for a Node project that needs pnpm, a .env file, and a local database."
 ]
