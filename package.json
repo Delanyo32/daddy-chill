@@ -59,6 +59,7 @@
   "scripts": {
     "dev": "flue dev",
     "package:check": "npm pack --dry-run",
+    "version": "node scripts/sync-version.mjs && git add gemini-extension.json .claude-plugin/plugin.json .codex-plugin/plugin.json .github/plugin/plugin.json",
     "publish:dry": "npm pack --dry-run",
     "install:local": "node install.mjs install --global",
     "uninstall:local": "node install.mjs uninstall --global",
