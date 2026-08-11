@@ -24,6 +24,20 @@ The judge model is pinned separately. `JUDGE_MODEL` defaults to Sonnet 5 and doe
 follow `EVAL_MODEL`, because benchmarking a different model must not also move the
 ruler.
 
+The judge does two jobs. It counts the facts a reader needs in order to act, and it
+lists any hard term the answer used but never explained.
+
+The treatment arm is swappable. `EVAL_AGENT` defaults to `daddy-chill`, and pointing
+it at another agent scores that agent against the same prompts and the same gates:
+
+```sh
+EVAL_AGENT=my-variant pnpm evals
+```
+
+That is how a candidate rule gets measured before it lands in `SKILL.md`. Add an agent
+under `src/agents/` that carries the change, run it, and compare. Two rule changes were
+rejected this way before the current rules shipped.
+
 ## Per-prompt gates
 
 Things a single answer either does or does not do. No baseline needed.
