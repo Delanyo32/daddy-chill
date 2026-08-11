@@ -60,24 +60,21 @@ only when the actor is genuinely unknown.
 
 "Follow" also means "come after", so it is ambiguous.
 
-## Semantic compression
+## Terms you cannot swap
 
-Rewriting for the most meaning per word. It is rewriting, not truncating.
+STE swaps a hard word for an easy one. Some words have no easy version. A command
+name, a config key, and an error string are the text itself. Change them and the
+reader runs the wrong thing.
 
-Techniques:
+The rule for those: keep the term exact, then explain it in plain words next to it.
 
-1. Cut preamble and politeness.
-2. Turn prose into structured rules, lists, or tables.
-3. Say each thing once. Delete repeats worded differently.
-4. Use dense notation for structured data. Field names beat sentences.
+- No: "Set the revision history limit." (there is no such setting by that name)
+- Yes: "Set `revisionHistoryLimit`. It is the number of old versions Kubernetes keeps."
 
-The catch: faithfulness drops as the compression ratio rises. A shorter answer
-that lost a fact is not compressed, it is damaged. That is why SKILL.md gates on
-facts kept, not word count alone.
+Dropping the term is not simplifying. The reader cannot act without it.
 
 ## Sources
 
 - https://www.asd-ste100.org/
 - https://en.wikipedia.org/wiki/Simplified_Technical_English
 - https://www.techscribe.co.uk/techw/asd-simplified-technical-english.htm
-- https://arxiv.org/pdf/2501.00269 (faithfulness metrics survey)

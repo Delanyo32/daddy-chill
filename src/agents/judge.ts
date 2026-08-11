@@ -1,23 +1,27 @@
 import { defineAgent, type AgentRouteHandler } from '@flue/runtime';
 import { JUDGE_MODEL } from '../shared/config.ts';
 
-export const description = 'Counts how many facts from the baseline answer survive in the daddy-chill answer. The ruler, not an arm of the benchmark.';
+export const description = 'Counts how much of what a reader needs to act survives in the daddy-chill answer, and flags hard terms it left unexplained. The ruler, not an arm of the benchmark.';
 
 const JUDGE_INSTRUCTIONS = [
-	'You score information retention between two answers to the same question.',
+	'You score two answers to the same question. The PLAIN answer is the reference.',
 	'',
 	'Steps:',
 	'1. List the distinct factual claims in the REFERENCE ANSWER. Cap the list at 15.',
 	'2. Ignore filler, restatements of the question, and closing summaries. They are not facts.',
-	'3. Mark a fact CORE if a reader needs it to answer the QUESTION. Mark it EXTRA otherwise.',
-	'   Tangents, extra options, edge cases, and troubleshooting the question did not ask for are EXTRA.',
+	'3. Mark a fact NEEDED if a reader must have it to act on the QUESTION: a step, a value,',
+	'   a command, a flag, a precondition, or a warning about damage or data loss.',
+	'   Mark it EXTRA otherwise. Tangents, alternatives, and background nobody asked for are EXTRA.',
 	'4. For each fact, decide whether the SHORT ANSWER states it. Different wording still counts.',
 	'5. A fact stated more briefly counts as covered. Only count it missing if the reader would not learn it.',
+	'6. List any hard term the SHORT ANSWER uses but never explains. A hard term is a command,',
+	'   flag, config key, acronym, or piece of jargon a non-expert would not know. It counts as',
+	'   explained if plain words nearby say what it is or what it does.',
 	'',
 	'Reply with JSON and nothing else:',
 	'{"total": <all facts>, "covered": <all facts the short answer states>,',
-	' "core": <how many facts are CORE>, "coreCovered": <CORE facts the short answer states>,',
-	' "missing": ["<dropped CORE fact>", ...]}',
+	' "needed": <how many facts are NEEDED>, "neededCovered": <NEEDED facts the short answer states>,',
+	' "missing": ["<dropped NEEDED fact>", ...], "unexplained": ["<hard term left unexplained>", ...]}',
 ].join('\n');
 
 export const route: AgentRouteHandler = async (_c, next) => next();

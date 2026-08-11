@@ -6,17 +6,20 @@ The rules ship in `skills/daddy-chill/SKILL.md`. The agent-facing reference live
 `skills/daddy-chill/references/ste.md`, which the agent loads only when it needs the
 reasoning behind a rule.
 
-## Two sources
+## One source
 
 **Simplified Technical English (ASD-STE100)** is the standard behind aircraft
 maintenance manuals. Issue 9 (January 2025) has 53 writing rules and a dictionary of
 about 900 approved words. It exists because a mechanic misreading a step is a safety
 problem, so every rule is aimed at removing ambiguity.
 
-**Semantic compression** is rewriting for the most meaning per word. It is rewriting,
-not truncating. The research finding that shapes this whole repo: faithfulness drops
-as the compression ratio rises. A shorter answer is only better if nothing was lost,
-so the benchmark has to measure what survived.
+The skill borrows the rules that help any reader, and skips the dictionary.
+
+**Brevity is not a goal.** The skill used to chase semantic compression, meaning the
+most meaning per word. That is gone. See [what we removed](#what-we-removed) for the
+measurements that killed it. The goal now is that a reader can act on the answer
+without asking a follow-up question. A shorter answer is a side effect of plain words,
+not a target.
 
 ## What we took from STE
 
@@ -44,35 +47,60 @@ so the benchmark has to measure what survived.
 
 ## What we added
 
-Two things STE does not cover, because STE assumes you already decided what to say.
+Three things STE does not cover, because STE assumes you already decided what to say.
 
 **Answer first.** STE governs how you write a sentence, not what order the sentences
 go in. An agent that buries the answer under three paragraphs of context has followed
 every STE rule and still wasted the reader's time.
 
-**Compress, do not cut.** This is the semantic compression half, and it took two
-tries to get right.
+**Give the reader everything they need to act.** Every step, value, flag, and warning.
+This is the completeness rule, and it is what the benchmark gates on.
 
-The first version said "every fact in the long answer stays in the short one". That
-failed, and the benchmark showed exactly how: the skill silently deleted list items.
-It dropped 2 of 5 code review findings including a crash, and 4 items from a
-five-step setup guide. The wording pointed at "the long answer", an artifact that
-does not exist, because the agent writes fresh rather than rewriting something.
-"Answer first, detail only if asked" made it worse by giving permission to treat
-finding #4 as detail.
-
-The current version names items instead of facts:
+**Some terms cannot be swapped.** A command name, a config key, an error string. There
+is no easy synonym, and dropping the term leaves the reader unable to act. The rule is
+to keep the term exact and explain it in plain words next to it:
 
 ```
-Make each point shorter. Do not make fewer points.
-
-- List every item you would have listed. Shorten each one. Drop none.
-- If the question asks for five steps, give five steps.
-- Keep every finding, step, risk, and caveat. Cut words, not items.
+- No: "Set the revision history limit."
+- Yes: "Set `revisionHistoryLimit`. It is the number of old versions Kubernetes keeps."
 ```
 
-That moved core fact retention from 88.9% to 96.2%, at the cost of longer answers
-(109 to 138 median words). See [results](results.md).
+## What we removed
+
+The skill used to carry a `Compress, do not cut` section. It said to keep every item
+from the longer answer while making each item shorter. It worked on its own terms:
+core fact retention went from 88.9% to 96.2%.
+
+It was removed anyway, because the benchmark showed it fighting the reading level.
+
+**The evidence.** Run 3 held the best retention and also the worst grade (4.10) and
+worst jargon (14.24%) of any run. Removing the section moved both the right way.
+
+The mechanism is vocabulary, not sentence length. Sentences got *shorter* with the
+rule. Pull the 53 facts the no-compression run dropped, and score them with the same
+Dale-Chall ruler the benchmark uses:
+
+| Text | Difficult-word ratio |
+| --- | ---: |
+| the facts that got dropped | 31.8% |
+| the plain agent's own writing | 24.03% |
+| the daddy-chill answers | 13.13% |
+
+The dropped facts are 2.4 times harder than the answers they came from. They are
+things like `REINDEX/VACUUM`, `PITR`, and named research papers. Proper nouns,
+acronyms, and command names.
+
+So the two rules were fighting over the same words. The simplicity rules said drop the
+hard word. The compression rule said keep the item that word belongs to. Whichever won,
+one metric got worse.
+
+**The fix was not a compromise, it was a third option.** Keep the term, and explain it.
+That satisfies both rules. A one-line version of the old rule was tested first and
+failed: it added 28 median words and moved retention 0.2 points.
+
+**Brevity stopped being a pass condition** at the same time. The benchmark no longer
+asserts the skill writes fewer words than the control, and no longer scores facts per
+100 words. Retention went to 100% and median length went to 201 words.
 
 ## Never simplify
 
@@ -104,4 +132,3 @@ into `rules.ts`, and the test tells you if you missed.
 - https://www.asd-ste100.org/
 - https://en.wikipedia.org/wiki/Simplified_Technical_English
 - https://www.techscribe.co.uk/techw/asd-simplified-technical-english.htm
-- https://arxiv.org/pdf/2501.00269 (faithfulness metrics survey)
