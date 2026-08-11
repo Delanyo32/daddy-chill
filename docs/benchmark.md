@@ -33,10 +33,10 @@ Things a single answer either does or does not do. No baseline needed.
 | Longest sentence | `<= 20` | one run-on hiding behind a good average |
 | Longest paragraph | `<= 6` | walls of text |
 | Em dash count | `0` | banned punctuation |
-| Core facts kept | `>= 80%`, or 1 dropped | facts dropped instead of shortened |
+| Facts needed to act | `>= 80%`, or 1 dropped | a step the reader cannot proceed without |
 
-The core-facts gate tolerates a single dropped fact on purpose. A ratio gate has a
-denominator problem: with 4 core facts the only reachable scores are 1.0, 0.75, and
+The needed-facts gate tolerates a single dropped fact on purpose. A ratio gate has a
+denominator problem: with 4 needed facts the only reachable scores are 1.0, 0.75, and
 0.5, so `>= 80%` silently becomes "zero misses" whenever the judge finds few facts.
 Two dropped facts fails at any size, and the median gate below catches loss spread
 thinly across every prompt.
@@ -46,19 +46,16 @@ down to 7 words, so a single 40-word sentence passes an average gate untouched.
 
 ## Median gates
 
-Reading level and length swing with the question, so these run across all 20 prompts
-at once.
+Reading level swings with the question, so these run across all 20 prompts at once.
 
 | Metric | Gate | What it catches |
 | --- | --- | --- |
 | Flesch-Kincaid grade | `<= 8` and below baseline | reading level |
-| Word count | below baseline | padding |
 | Difficult-word ratio | below baseline | jargon |
 | Avg sentence length | `<= 20` words | long sentences |
 | Tense violations | at or below baseline | non-simple tenses |
 | Synonym drift | at or below baseline | many words, one idea |
-| Core facts kept | `>= 80%` | steady, thin fact loss |
-| Facts per 100 words | above baseline | the whole point |
+| Facts needed to act | `>= 80%` | steady, thin loss of steps |
 
 The difficult-word ratio is the share of words outside the Dale-Chall list of 3,000
 easy words. A short sentence stuffed with jargon fails on that even though it passes
@@ -66,27 +63,48 @@ on length.
 
 Median, not mean. One refusal or one runaway answer should not move the number.
 
-## Facts per 100 words
+## Reported, never gated
 
-This is the headline number, and the only one that can tell compression from
-deletion.
+| Metric | Why it is not a gate |
+| --- | --- |
+| Word count | brevity is not a goal. A clear answer is allowed to be longer. |
+| All facts kept | the control is verbose by design, so its tangents are not a target. |
+| Unexplained hard terms | the judge is loose about what counts as hard. Gating it now would fail on noise. |
+
+The benchmark used to gate word count and "facts per 100 words". Both are gone.
+Measurement showed the compression goal was raising the reading level, because the
+facts it forced back in are the hardest words in the answer. See
+[the rules](rules.md#what-we-removed).
+
+## Facts needed to act
+
+This is the headline number, and the only gate that can tell a simpler answer from an
+incomplete one.
 
 Every other metric rewards saying less. "I could not fetch that page" is short,
 plain, and grades low, so it used to pass every readability gate while answering
 nothing.
 
 So the `judge` agent lists the facts in the plain answer, then counts how many the
-daddy-chill answer still states. Density is facts kept divided by words used. A
-refusal keeps 0 facts and scores 0.
+daddy-chill answer still states. A refusal keeps 0 and scores 0.
 
-**Core facts, not all facts.** The judge splits each fact into core (a reader needs it
-to answer the question) and extra (tangents, options, and troubleshooting nobody asked
-for). Only core facts are gated.
+**Needed, not all.** The judge marks a fact NEEDED if the reader must have it to act:
+a step, a value, a command, a flag, a precondition, or a warning about damage or data
+loss. Everything else is EXTRA. Only needed facts are gated.
 
-The plain agent is verbose by design. That is what makes it a control. Grading
-compression against every scrap of it would mean the only way to pass is to not
-compress. Both numbers are reported, so you can see the gap: the space between "core
-facts kept" and "all facts kept" is padding the skill correctly threw away.
+The plain agent is verbose by design. That is what makes it a control. Grading against
+every scrap of it would mean the only way to pass is to repeat it. Both numbers are
+reported, so you can see the gap: the space between "facts needed to act" and "all
+facts kept" is background the skill correctly left out.
+
+## Unexplained terms
+
+Some terms have no easy synonym. The skill keeps them exact and explains them in plain
+words. The judge lists any hard term the answer used but never explained, so you can
+see when the skill kept a `pg_restore` or a `PITR` bare.
+
+This is reported only. It is a new measure and the judge is inconsistent about what
+counts as hard, so it does not fail a run yet.
 
 ## Notes on the measurement
 
@@ -113,7 +131,7 @@ facts kept" and "all facts kept" is padding the skill correctly threw away.
 
 ## Unit tests
 
-`pnpm test` runs 22 tests against the scoring code with no API key and no model calls.
+`pnpm test` runs 23 tests against the scoring code with no API key and no model calls.
 Every metric is a pure function with a fixture. It covers the markdown-to-prose
 conversion, each new STE metric, the median, the judge output parser, and the
 rules-drift check.

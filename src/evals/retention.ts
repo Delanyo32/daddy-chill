@@ -1,32 +1,39 @@
 /**
- * Did the short answer keep the meaning, or just say less?
+ * Can the reader act on the short answer, or did it leave out what they needed?
  *
- * Every other metric here rewards brevity, so "I could not fetch that page"
- * scores perfectly while answering nothing. This is the only gate that can tell
- * compression from deletion: a judge lists the facts in the baseline answer, then
- * counts how many survive in the daddy-chill answer.
+ * Every other metric here rewards saying less, so "I could not fetch that page"
+ * scores perfectly while answering nothing. This is the only gate that can tell a
+ * simpler answer from an incomplete one: a judge lists the facts in the baseline
+ * answer, marks the ones a reader needs in order to act, then counts how many
+ * survive in the daddy-chill answer.
  */
 export interface Retention {
 	/** Facts the judge found in the baseline answer. */
 	total: number;
-	/** How many of those the short answer still states. */
+	/** How many of those the short answer still states. Reported, never gated. */
 	covered: number;
-	/** covered / total. 1 means nothing was lost, padding included. */
-	ratio: number;
-	/** Of `total`, the facts a reader needs to answer the question. */
-	core: number;
-	/** How many core facts the short answer still states. */
-	coreCovered: number;
+	/** Of `total`, the facts a reader needs in order to act. */
+	needed: number;
+	/** How many needed facts the short answer still states. */
+	neededCovered: number;
 	/**
-	 * coreCovered / core. This is the gate, not `ratio`.
+	 * neededCovered / needed. This is the gate.
 	 *
 	 * The baseline is verbose by design, so it volunteers tangents nobody asked
-	 * for. Grading compression against every scrap of it means the only way to
-	 * pass is to not compress. Core facts are the part that has to survive.
+	 * for. Grading against every scrap of it would mean the only way to pass is to
+	 * repeat the baseline. What a reader needs to act is the part that has to survive.
 	 */
-	coreRatio: number;
-	/** Core facts the short answer dropped. Printed on failure. */
+	neededRatio: number;
+	/** Needed facts the short answer dropped. Printed on failure. */
 	missing: string[];
+	/**
+	 * Hard terms the short answer used but never explained.
+	 *
+	 * Some terms cannot be swapped for an easy word: a command, a flag, a config
+	 * key. The rule is to keep them and explain them, so this reports the ones that
+	 * arrived bare. Reported, not gated: the judge is loose about what counts as hard.
+	 */
+	unexplained: string[];
 }
 
 export function buildJudgeInput(question: string, reference: string, candidate: string): string {
@@ -46,7 +53,7 @@ export function parseJudgeOutput(raw: string): Retention {
 	const match = raw.replace(/```(?:json)?/g, '').match(/\{[\s\S]*\}/);
 	if (!match) throw new Error(`judge returned no JSON object: ${raw.slice(0, 200)}`);
 
-	const parsed = JSON.parse(match[0]) as Partial<Retention>;
+	const parsed = JSON.parse(match[0]) as Record<string, unknown>;
 	const total = Number(parsed.total);
 	const covered = Number(parsed.covered);
 	if (!Number.isFinite(total) || !Number.isFinite(covered)) {
@@ -54,30 +61,27 @@ export function parseJudgeOutput(raw: string): Retention {
 	}
 	if (total <= 0) throw new Error('judge found no facts in the reference answer');
 
-	const rawCore = Number(parsed.core);
-	const rawCoreCovered = Number(parsed.coreCovered);
-	if (!Number.isFinite(rawCore) || !Number.isFinite(rawCoreCovered)) {
-		// Same reason as above: defaulting coreCovered to 0 would read as "the skill
-		// dropped every fact a reader needed", and fail the skill for a judge slip.
-		throw new Error(`judge returned no core counts: ${match[0].slice(0, 200)}`);
+	const rawNeeded = Number(parsed.needed);
+	const rawNeededCovered = Number(parsed.neededCovered);
+	if (!Number.isFinite(rawNeeded) || !Number.isFinite(rawNeededCovered)) {
+		// Same reason as above: defaulting neededCovered to 0 would read as "the skill
+		// dropped everything a reader needed", and fail the skill for a judge slip.
+		throw new Error(`judge returned no needed counts: ${match[0].slice(0, 200)}`);
 	}
 
-	// A core count above the total means the judge miscounted, so clamp both ways.
-	const core = Math.min(rawCore, total);
-	const coreCovered = Math.min(rawCoreCovered, core);
+	// A needed count above the total means the judge miscounted, so clamp both ways.
+	const needed = Math.min(rawNeeded, total);
+	const neededCovered = Math.min(rawNeededCovered, needed);
 
 	return {
 		total,
 		covered: Math.min(covered, total),
-		ratio: Math.min(covered, total) / total,
-		core,
-		coreCovered,
-		coreRatio: core === 0 ? 1 : coreCovered / core,
+		needed,
+		neededCovered,
+		neededRatio: needed === 0 ? 1 : neededCovered / needed,
 		missing: Array.isArray(parsed.missing) ? parsed.missing.map(String) : [],
+		// ponytail: optional. It is reported, not gated, so a judge that omits it
+		// should not throw the way a missing count does.
+		unexplained: Array.isArray(parsed.unexplained) ? parsed.unexplained.map(String) : [],
 	};
-}
-
-/** Facts kept per 100 words. The real semantic compression number. */
-export function factDensity(covered: number, words: number): number {
-	return words === 0 ? 0 : (covered / words) * 100;
 }

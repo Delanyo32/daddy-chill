@@ -1,5 +1,5 @@
 import { expect, test } from 'vitest';
-import { buildJudgeInput, factDensity, parseJudgeOutput } from './retention.ts';
+import { buildJudgeInput, parseJudgeOutput } from './retention.ts';
 
 test('the judge sees the question and both answers', () => {
 	const input = buildJudgeInput('Why?', 'Long answer.', 'Short.');
@@ -10,35 +10,47 @@ test('the judge sees the question and both answers', () => {
 
 test('JSON wrapped in fences and prose still parses', () => {
 	const raw =
-		'Here is my score:\n```json\n{"total": 10, "covered": 6, "core": 5, "coreCovered": 5, "missing": []}\n```\nDone.';
+		'Here is my score:\n```json\n{"total": 10, "covered": 6, "needed": 5, "neededCovered": 5, "missing": [], "unexplained": []}\n```\nDone.';
 	expect(parseJudgeOutput(raw)).toEqual({
 		total: 10,
 		covered: 6,
-		ratio: 0.6,
-		core: 5,
-		coreCovered: 5,
-		coreRatio: 1,
+		needed: 5,
+		neededCovered: 5,
+		neededRatio: 1,
 		missing: [],
+		unexplained: [],
 	});
 });
 
-test('dropping padding scores worse on ratio than on coreRatio', () => {
-	// The whole reason the gate is on coreRatio: this answer kept everything the
-	// reader needed and threw away the tangents. That is the goal, not a failure.
-	const scored = parseJudgeOutput('{"total": 15, "covered": 9, "core": 9, "coreCovered": 9}');
-	expect(scored.ratio).toBe(0.6);
-	expect(scored.coreRatio).toBe(1);
+test('dropping background does not count against the gate', () => {
+	// The whole reason the gate is on neededRatio: this answer kept everything the
+	// reader needed to act and left out the background. That is fine, not a failure.
+	const scored = parseJudgeOutput('{"total": 15, "covered": 9, "needed": 9, "neededCovered": 9}');
+	expect(scored.covered).toBe(9);
+	expect(scored.neededRatio).toBe(1);
 });
 
-test('covered cannot exceed total, and core cannot exceed either', () => {
-	expect(parseJudgeOutput('{"total": 5, "covered": 9, "core": 5, "coreCovered": 5}')).toMatchObject({
+test('a dropped needed fact lowers the ratio', () => {
+	const scored = parseJudgeOutput('{"total": 12, "covered": 7, "needed": 8, "neededCovered": 6}');
+	expect(scored.neededRatio).toBe(0.75);
+});
+
+test('covered cannot exceed total, and needed cannot exceed either', () => {
+	expect(parseJudgeOutput('{"total": 5, "covered": 9, "needed": 5, "neededCovered": 5}')).toMatchObject({
 		covered: 5,
-		ratio: 1,
 	});
-	expect(parseJudgeOutput('{"total": 5, "covered": 5, "core": 8, "coreCovered": 8}')).toMatchObject({
-		core: 5,
-		coreCovered: 5,
+	expect(parseJudgeOutput('{"total": 5, "covered": 5, "needed": 8, "neededCovered": 8}')).toMatchObject({
+		needed: 5,
+		neededCovered: 5,
 	});
+});
+
+test('unexplained terms come through, and are optional', () => {
+	expect(
+		parseJudgeOutput('{"total": 4, "covered": 4, "needed": 4, "neededCovered": 4, "unexplained": ["pg_restore", "PITR"]}').unexplained,
+	).toEqual(['pg_restore', 'PITR']);
+	// A judge that omits the field must not throw. It is reported, not gated.
+	expect(parseJudgeOutput('{"total": 4, "covered": 4, "needed": 4, "neededCovered": 4}').unexplained).toEqual([]);
 });
 
 test('a garbled judge reply throws instead of scoring zero', () => {
@@ -46,11 +58,5 @@ test('a garbled judge reply throws instead of scoring zero', () => {
 	expect(() => parseJudgeOutput('I could not do that.')).toThrow(/no JSON object/);
 	expect(() => parseJudgeOutput('{"note": "hi"}')).toThrow(/no counts/);
 	expect(() => parseJudgeOutput('{"total": 0, "covered": 0}')).toThrow(/no facts/);
-	expect(() => parseJudgeOutput('{"total": 10, "covered": 4}')).toThrow(/no core counts/);
-});
-
-test('density rewards keeping facts in fewer words', () => {
-	expect(factDensity(8, 200)).toBe(4);
-	expect(factDensity(8, 100)).toBe(8);
-	expect(factDensity(8, 0)).toBe(0);
+	expect(() => parseJudgeOutput('{"total": 10, "covered": 4}')).toThrow(/no needed counts/);
 });

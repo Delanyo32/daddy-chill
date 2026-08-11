@@ -13,15 +13,19 @@ Pins agent output to an 8th-grade reading level. Short sentences, plain words, n
 filler. The rules come from Simplified Technical English, the standard behind
 aircraft maintenance manuals.
 
+It simplifies the writing, not the answer. A term that cannot be swapped for an
+easy word stays exact, and gets explained in plain words next to it.
+
 Latest run, 20 prompts, median, against an unskilled control:
 
 | | Plain | daddy-chill |
 | --- | ---: | ---: |
-| Flesch-Kincaid grade | 9.15 | **4.10** |
-| Word count | 374 | **138** |
-| Facts per 100 words | 3.59 | **6.55** |
+| Flesch-Kincaid grade | 8.80 | **3.60** |
+| Difficult-word ratio | 23.58% | **12.16%** |
+| Facts needed to act, kept | | **100%** |
 
-It keeps 96.2% of the facts a reader needed, in a third of the words.
+It halves the reading level and keeps everything the reader needs to act.
+Word count is measured but not gated: a clear answer is allowed to be longer.
 [Full results](docs/results.md).
 
 ## Install
