@@ -114,11 +114,50 @@ facts kept" is background the skill correctly left out.
 ## Unexplained terms
 
 Some terms have no easy synonym. The skill keeps them exact and explains them in plain
-words. The judge lists any hard term the answer used but never explained, so you can
-see when the skill kept a `pg_restore` or a `PITR` bare.
+words. Leaving one bare is the failure that costs a reader the answer, so it is gated
+twice, from two directions.
 
-This is reported only. It is a new measure and the judge is inconsistent about what
-counts as hard, so it does not fail a run yet.
+| Check | Where | Catches | Misses |
+| --- | --- | --- | --- |
+| `bareIdentifiers` | `src/evals/metrics.ts` | shape-detected names: `RSS`, `PCIe`, `MADV_WILLNEED`, `vmhwm_mb`, `assignLayers`, and any one-word inline code span | all-lowercase coinages like `mmap` |
+| `unexplained` | the `judge` agent | anything a non-expert would not know, including the lowercase ones | whatever the judge is loose about |
+
+Both gate at zero. Neither is reliable alone. The regex cannot tell a real definition
+from a sentence that merely uses the term, so it only proves the floor case: a name shown
+with no plain words anywhere near it. The judge reads for meaning but is inconsistent.
+Together they cover each other.
+
+This was reported and not gated for six runs. That is how a session shipped 40 undefined
+terms while passing every median gate.
+
+## Could a non-expert act on it?
+
+The judge answers one question about the whole answer: could a reader who does not
+already know the subject act on it without a follow-up question? It says false if the
+reader would have to look up a term, guess what a number means, or work out which value
+goes where.
+
+This is the only gate that scores understanding instead of form. Every other number here
+can be satisfied by an answer that is short, plain, complete, and unusable.
+
+## Numbers per 100 words
+
+A wall of measurements reads as hard whatever the grade says. `numberDensity` counts
+numbers per 100 words on the raw markdown, so tables count.
+
+The cap is calibrated on one failing session, not a corpus. The two answers that made
+the reader ask for something simpler scored 25.3 and 23.6. The answer they accepted
+scored 4.4. Per answer the cap is 20, and the median cap is 12. Retune both after a
+full run.
+
+## The reading level is a band
+
+The gate used to be `grade <= 8`. Lower always won, so nothing stopped the score falling.
+A real session held a median grade of 2.50 while leaving 40 terms undefined.
+
+The gate is now 6 to 8. Explaining a term costs words and clauses, so an answer that
+explains its jargon cannot also read like a children's book. Scoring under the floor
+means explanation was cut, not that the writing got clearer.
 
 ## Notes on the measurement
 
@@ -127,8 +166,21 @@ counts as hard, so it does not fail a run yet.
   the next character is a capital letter, so an unprocessed bullet list counts as one
   giant sentence. Left alone, it would punish exactly the bulleted output the skill is
   meant to produce.
-- **Code is excluded.** Code blocks and inline code are removed before scoring, so the
-  skill is never rewarded for dumbing down a command or a stack trace.
+- **Code is excluded from the reading-level formulas, not from the run.** `toProse`
+  removes code blocks and inline code, so the skill is never rewarded for dumbing down a
+  command or a stack trace. `bareIdentifiers` and `numberDensity` read the raw markdown
+  instead, because the identifiers and the number tables live in exactly the blocks
+  `toProse` throws away.
+- **The difficult-word ratio counts occurrences.** It used to divide `difficultWords` by
+  total words, but that function returns a SET, so repeating one hard word improved the
+  score as the answer grew. Measured on the old code: "Quantization matters." scored
+  0.500 and the same sentence ten times scored 0.050. Dropping `text-readability`'s
+  2-syllable floor was tried too, and rejected: it rates plain modern prose at 30.6%,
+  because the Dale-Chall easy list predates "app", "login", and "click".
+- **Some prompts are conversations.** An entry in `prompts.json` can be an array of
+  turns. Every turn reuses one agent instance id, so the agent sees the whole thing, and
+  only the last answer is scored. A session-start instruction has had time to drift by
+  then, which single-turn prompts never test.
 - **Bullets are not paragraphs.** The paragraph gate skips bullets, headings, and table
   rows. The skill asks for bullets, and a bullet is one idea by rule, so a long list is
   not a wall of text.

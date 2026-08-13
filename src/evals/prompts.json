@@ -18,5 +18,22 @@
 	"Write a runbook for restoring a Postgres database from last night's backup.",
 	"Write a warning notice for a script that deletes every file in a directory.",
 	"Write the steps to roll back a bad deploy on Kubernetes.",
-	"Write install steps for a Node project that needs pnpm, a .env file, and a local database."
+	"Write install steps for a Node project that needs pnpm, a .env file, and a local database.",
+	"Here are last night's load test results: p50 12ms, p95 340ms, p99 2100ms, error rate 0.3%, throughput 4200 rps, peak RSS 1.8GB, and 14 pod restarts. Write the summary for the team.",
+	"Summarise this benchmark for the release notes: cold start 890ms vs 210ms, bundle 2.4MB vs 780KB, TTFB p95 running 61ms over budget, and CLS at 0.19.",
+	[
+		"Explain what a bloom filter is and when I would use one.",
+		"How does it decide how many hash functions to use?",
+		"Give me the false positive rate at 1, 4, and 8 hash functions for a 1MB filter holding 100k items."
+	],
+	[
+		"Explain how Postgres decides whether to use an index.",
+		"What happens when the table statistics go stale?",
+		"Walk me through an EXPLAIN ANALYZE output and tell me what each column means."
+	],
+	[
+		"What causes a memory leak in a long-running Node process?",
+		"How do I work out which object is leaking?",
+		"I have a heap snapshot with shallow size, retained size, and distance columns. Tell me how to read it."
+	]
 ]
