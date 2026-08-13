@@ -45,6 +45,41 @@ not a target.
 - **The other 45 rules.** Most of them are specific to maintenance manuals: how to
   write a torque value, when to use a figure callout. They do not transfer.
 
+## Two tiers, not one list
+
+The rules used to be one flat list of 17 bullets. Everything had equal weight, so the
+em dash rule sat next to the jargon rule and read the same size.
+
+That is how the rules lost a fight to each other. "Keep sentences under 20 words" has a
+number and a checklist entry. "Define it the first time in one short clause" has neither.
+Defining a term inside the sentence that uses it makes a long sentence, so the model kept
+the countable rule and dropped the definition. Run 6 recorded the same collision from the
+other side: three prompts failed the 20-word cap, and the longest was 36 words because
+the answer explained a term in the sentence that used it.
+
+`SKILL.md` now has two tiers:
+
+| Tier | Contains | Rank |
+| --- | --- | --- |
+| **Never break these** | answer first, explain every hard term, idea before number, explain column labels, warning first, everything needed to act | wins every conflict |
+| **Style** | sentence length, paragraph length, tenses, synonyms, noun stacks, active voice, em dashes | never wins against the tier above |
+
+One line makes the tie-break explicit: **never drop an explanation to keep a sentence
+short. Write two sentences.**
+
+## The checklist used to undercut the rule
+
+Two lines disagreed, and the looser one ran last:
+
+| Where | Text | Terms it covers |
+| --- | --- | --- |
+| Rules | "define it the first time" | all |
+| Check before sending | "any hard term used **more than once**" | 2 or more |
+
+Every term used once got a free pass. In the failing session that pass covered 16 terms,
+including `MADV_WILLNEED`, `GEMM`, `mlock`, and `TFLOP`. The checklist is the last thing
+the model reads, so the loose version won. The phrase is gone.
+
 ## What we added
 
 Three things STE does not cover, because STE assumes you already decided what to say.
@@ -102,7 +137,16 @@ failed: it added 28 median words and moved retention 0.2 points.
 asserts the skill writes fewer words than the control, and no longer scores facts per
 100 words. Retention went to 100% and median length went to 201 words.
 
-## Never simplify
+## Always simple, except these
+
+The section used to be called **Never simplify**, and the name was doing damage. It read
+as a licence. Four bullets said "keep this exact", and one trailing sentence said
+"explain it", so the model took the permission and skipped the duty.
+
+It now leads with the default and frames the list as the one exception. The exception
+covers the text itself, never the explanation of the text. Show, then explain, in that
+order. The closing line names the failure directly: copying a command and moving on
+fails the rule as badly as rewriting it.
 
 Some text has to survive character for character, because rewriting it breaks
 things:
@@ -112,10 +156,26 @@ things:
 - Error messages and stack traces
 - API names, config keys, and version numbers
 
-The skill explains these in plain words around the exact text. It does not paraphrase
-the text itself. The benchmark enforces the same rule from the other side: code blocks
-and inline code are stripped before scoring, so the skill is never rewarded for
-dumbing down a command.
+The skill keeps the text exact, then explains it in the next sentence. Both halves are
+required. A bare command with no explanation fails this rule as badly as a rewritten one.
+
+The benchmark used to enforce only one half. `toProse` strips code blocks and inline
+code before scoring, so the skill is never rewarded for dumbing down a command. But the
+strip cuts both ways: for six runs nothing punished the skill for dumping one raw either.
+
+A real session shipped this and passed every median gate:
+
+```
+read_mb      356.3      359.5      341.3      341.3
+vmhwm_mb     129.9      129.9       46.0       73.1
+stall_ms       0.0        0.0        0.0        5.8
+```
+
+`vmhwm_mb` is never defined. The whole block was stripped, so the answer still scored a
+Flesch-Kincaid grade of 2.5. The reader could not use it.
+
+`bareIdentifiers` in `src/evals/metrics.ts` now reads the raw markdown and closes that
+half. See [what the benchmark checks](./benchmark.md).
 
 ## One copy, two places
 

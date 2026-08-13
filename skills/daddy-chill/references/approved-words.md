@@ -1,0 +1,446 @@
+# Approved verbs and adjectives (ASD-STE100 Issue 9)
+
+The 422 approved verbs and adjectives from the Simplified Technical English
+dictionary. Each word has one meaning. Use the word only in that meaning.
+
+You may use the normal forms: past tense, third person, and comparatives.
+"accept" allows "accepts" and "accepted".
+
+This list covers verbs and adjectives only. Nouns, adverbs, and function words
+are not restricted here. Pick plain ones by the rules in SKILL.md.
+
+Add your own Technical Names for the subject you write about (a product, a
+command, a file format). Keep those exact.
+
+Source: https://github.com/sourdough-bread/asd-ste100-checker (Apache-2.0), extracted
+from the ASD-STE100 Issue 9 PDF. The standard is copyright ASD. Get the official copy
+free for non-commercial use at https://www.asd-ste100.org/.
+
+
+## Verb (208)
+
+- **absorb**: To take up or into 2. To decrease the effect of
+- **accept**: To make a decision that something is satisfactory
+- **activate**: To make a system, function, or feature ready for operation
+- **adapt**: To change or adjust to that which is necessary
+- **add**: To increase the number, dimension, or quantity
+- **adjust**: To put in or come to a specified position or value
+- **agree**: To be consistent with
+- **align**: To put or come into a specified position in relation to a line
+- **apply**: To put or spread something on 2. To use something (for example, pressure, force, load) to cause an effect
+- **arm**: To install armaments 2. To prepare for automatic operation
+- **assemble**: To attach, connect, or put together the parts of something
+- **attach**: To stay together or to cause different items to stay together
+- **balance**: To make equal
+- **be**: To occur, exist 2. To have a property, to be equal to
+- **become**: To come to be
+- **bend**: To change or cause to change from straight to curved
+- **bleed**: To let a gas out of
+- **blow**: To cause gas to move
+- **bond**: To make an electrical bond 2. To attach firmly or become firmly attached with another material
+- **break**: To cause to separate or become separated into parts by force
+- **breathe**: To get gas into or out of the lungs
+- **burn**: To cause or undergo combustion 2. To cause injury or damage through heat
+- **bypass**: To change a circuit so that it goes past something instead of through it
+- **calculate**: To find a result by mathematics
+- **calibrate**: To measure and adjust the precision of something
+- **can**: Auxiliary modal verb that means to be possible, to be able to, or to be permitted to
+- **cancel**: To do the necessary steps to stop a process 2. To remove the validity of something
+- **cannot**: Auxiliary modal verb that means to not be able to
+- **catch**: To stop or prevent the movement of something
+- **cause**: To be the cause of
+- **change**: To become or to cause to become different
+- **charge**: To accumulate or add electrical energy
+- **clean**: To remove dirt or unwanted materials
+- **close**: To move together, or to move to a position that stops or prevents materials from going in or out 2. To operate a circuit breaker to make an electrical circuit
+- **collect**: To come, or cause to come, together in one location
+- **come**: To move to your location FUMES MUST NOT
+- **come on**: To become bright with light when an internal power source is energized
+- **compare**: To examine for differences
+- **complete**: To bring to an end
+- **compress**: To decrease or cause to decrease in dimension or volume
+- **connect**: To come together or cause to come together to make one unit or system
+- **contact**: To start communication
+- **contain**: To have in something or hold in something
+- **continue**: To stay or keep in current condition or operation
+- **control**: To give or send signals that adjust, operate, or keep something to a limit, or that cause something to operate
+- **correct**: To make correct
+- **count**: To add the number of objects or occurrences to get a total In the opposite direction
+- **cut**: To divide into parts 2. To remove with a sharp tool
+- **de-energize**: To remove electrical power from
+- **deactivate**: To make a system, function, or feature no longer ready for operation
+- **decrease**: To make or become smaller or lower
+- **deflate**: To make or become smaller as a result of depressurization
+- **defuel**: To remove fuel
+- **deploy**: To move or cause to move from a specified position of storage and into operation
+- **disarm**: To remove armaments 2. To prevent automatic operation
+- **disassemble**: To take an assembly apart
+- **discard**: To not use again
+- **disconnect**: To separate something from the thing that it is connected to, or to become separated
+- **disengage**: To release or become released from something that engages
+- **divide**: To separate into parts or groups 2. To do mathematical division
+- **do**: To complete a procedure, task, or step 2. As an auxiliary verb a. As part of a negative command or statement b. As part of a question
+- **drain**: To remove liquid
+- **drink**: To consume liquid For safety instructions, use
+- **dry**: To remove liquid or moisture, or to become dry
+- **eat**: To consume food For safety instructions, use
+- **eject**: To move or to cause a person or item to move from an aircraft or equipment with force
+- **energize**: To supply electrical power to
+- **engage**: To correctly align and come together
+- **erase**: To remove data from a medium
+- **examine**: To look carefully at
+- **expand**: To increase in dimension, volume, or time
+- **extend**: To increase, or cause something to increase, in dimension or range
+- **extinguish**: To stop burning For lights or lamps, use
+- **fall**: To move down by the force of gravity
+- **feather**: To put a propeller to a position of minimum drag
+- **feel**: To touch to find
+- **fill**: To put into a container or a space to the maximum level or, if specified, to a given level, pressure, or quantity
+- **find**: To discover, to examine something so that you know
+- **fire**: To ignite, or to operate items that contain an explosive material
+- **flash**: To come on and go off
+- **flow**: To move as a fluid moves
+- **flush**: To remove something or to operate with a flow of liquid
+- **fold**: To double over or to cause to double over on itself
+- **follow**: To come after, to go after
+- **freeze**: To go or cause to go to a temperature below the freezing point of a liquid (usually of water)
+- **get**: To obtain, to come into the state of having
+- **give**: To provide
+- **go**: To move to or from something
+- **go off**: To become dark when an internal power source is de-energized
+- **ground**: To connect to the ground or to a large object of zero potential
+- **hang**: To attach or to be attached to something above with no support from below
+- **have**: To possess as a part or quality
+- **hear**: To know by sound in the ear
+- **help**: To make something easier or better
+- **hit**: To touch suddenly and with much force
+- **hold**: To continue to have in the hand or grip 2. To continue to have in a specified location, position, or condition
+- **identify**: To use a specified code or marking to supply with an identity 2. To show an identity
+- **ignore**: Not to think about something, not to do something about
+- **illuminate**: To make something visible with an external light source For lights or lamps, use
+- **include**: To make, or to be, part of
+- **increase**: To make or become larger or higher in value
+- **inflate**: To make or become larger as a result of pressurization by a gas
+- **install**: To attach an item in or to a second item installs an item
+- **interchange**: To put or use each of two things in the place of the other without change
+- **isolate**: To prevent a supply or connection to
+- **keep**: To continue to have or hold
+- **kill**: To cause death
+- **know**: To be sure of data, to have data ready to use
+- **latch**: To hold something in position with a latching device
+- **let**: To give opportunity
+- **lift**: To move something up
+- **listen**: To use your ears to hear or find
+- **lock**: To attach something, or hold it in position with a locking device
+- **look**: To use your eyes to see or find
+- **loosen**: To cause to be not tight
+- **lower**: To move something down
+- **lubricate**: To apply lubricant
+- **make**: To manufacture, to cause to occur or to become
+- **make sure**: To verify and/or do the necessary steps
+- **measure**: To find the dimensions, capacity, or quantity of something with a mechanism
+- **melt**: To change or to cause something to change from solid to liquid because of heat
+- **mix**: To put together two or more materials to become one 2. To become combined IF FUEL AND WATER
+- **monitor**: To do a check at something for a period of time to find if there is a change
+- **moor**: To hold something in position with ropes and cables
+- **move**: To change or cause to change position or location
+- **multiply**: To use multiplication to get a result
+- **must**: Auxiliary modal verb that shows obligation
+- **obey**: To do that which the procedures or instructions tell you
+- **occur**: To be found or to take place, to come to be
+- **open**: To move or cause to move from the closed position 2. To operate a circuit breaker to interrupt an electrical circuit
+- **operate**: To put, keep, or be in action
+- **override**: To prevent the automatic operation of a part or system
+- **paint**: To apply paint to something
+- **park**: To stop a vehicle and to let it stay in one position on the ground
+- **point**: To show the position or direction of 2. To turn something in a specified direction
+- **polish**: To make smooth or shiny
+- **prepare**: To make or become ready
+- **pressurize**: To supply pressure
+- **prevent**: To make sure that something does not occur
+- **protrude**: To be farther forward or out from an adjacent surface
+- **pull**: To use a force on something to move it toward the source of the force
+- **push**: To apply a force to something to move it away from the source of the force 2. To move with a force against something
+- **put**: To cause something to move or to be in a specified position or condition
+- **put on**: To cover your skin or face with clothing, or other items that give protection
+- **read**: To come to know information with the eyes or electronically
+- **receive**: To get energy, material, or a signal from a different source
+- **recommend**: To advise that which is best
+- **record**: To make notes of and keep data to use subsequently 2. To put data on a storage medium
+- **recycle**: To put a used material through a process to make it possible to use it or its components again
+- **refer**: To tell a person where to find information 2. To give information
+- **refuel**: To supply with fuel
+- **reject**: To make a decision that something is unsatisfactory
+- **release**: To make free, to let go
+- **remove**: To take or move something away from its initial position
+- **repair**: To make an item serviceable
+- **replace**: To remove an item and to install a new or serviceable item of the same type
+- **retract**: To pull in(to) 2. To move in(to)
+- **rub**: To move or cause something to move with pressure and friction along a surface
+- **safety**: To prevent accidental operation 2. To make sure that something does not become loose
+- **schedule**: To plan something in a time or a sequence
+- **seal**: To prevent access or leaks
+- **see**: To know with the eyes
+- **select**: To make a choice
+- **send**: To cause to go
+- **sense**: To get an input automatically
+- **set**: To put something into a given adjustment, condition, or mode
+- **shake**: To move or cause to move quickly up and down or from side to side
+- **show**: To cause to be seen THE INDICATOR 2. To be in view or come into view
+- **simulate**: To make a condition that is the same as one that can occur in operation
+- **smell**: To sense with the nose
+- **smoke**: To breathe the fumes of burning material and especially tobacco
+- **soak**: To put something into a liquid and keep it there until it is fully wet or soft 2. To stay in liquid until fully wet or soft.
+- **speak**: To use a voice to make words
+- **spill**: To accidentally flow, or cause to flow, out of a container
+- **spray**: To apply as a spray
+- **start**: To begin a procedure, movement, or operation 2. To come into being, activity, or operation
+- **stay**: To continue to be in a location or condition
+- **stop**: To cause the end of a procedure, movement, or an operation 2. To come to an end WHEN THE FLOW
+- **stow**: To move or cause to move into a specified position of storage.
+- **subtract**: To take from a number or quantity
+- **supply**: To give something that is necessary 2. To make something available for use
+- **swallow**: To take through the mouth and esophagus into the stomach
+- **tag**: To put a tag on
+- **tap**: To hit lightly and quickly
+- **tell**: To give an order or supply information
+- **think**: To have an opinion
+- **tighten**: To cause to be tight
+- **tilt**: To move at an angle or to put something at an angle between the vertical and the horizontal
+- **torque**: To tighten to a specified torque
+- **touch**: To be in contact
+- **tow**: To pull something along
+- **transmit**: To send energy or a signal
+- **try**: To make an effort to do something
+- **tune**: To adjust equipment to the best performance
+- **turn**: To move or cause to move around an axis or a point
+- **twist**: To use a force that turns something and causes a distortion 2. To turn or change shape as a result of torsion
+- **unfold**: To open or to straighten or to cause to open or to straighten from a folded position or condition
+- **unlock**: To release or become released from a locked condition
+- **unwind**: To remove or become removed from around an object
+- **use**: To make something do its specified function
+- **wait**: To stop doing something while another thing occurs.
+- **walk**: To move on foot from one location to a different location
+- **want**: To intend, to desire
+- **wear**: To become damaged by friction
+- **weigh**: To measure the weight of something 2. To have a specified weight
+- **will**: Auxiliary modal verb that shows simple future tense
+- **wind**: To move around and around an object
+- **write**: To record data or information as words, letters, or symbols
+
+## Adjective (214)
+
+- **abrasive**: That can remove material by friction
+- **accidental**: That does not occur on purpose
+- **accurate**: Exact
+- **active**: A system, function, or feature in a state of action
+- **adjacent**: That which is near to an object, with no other object of the same type between the two
+- **aft**: At or nearer to the rear of an air or sea vehicle
+- **airborne**: In, or used in, flight
+- **all**: Full quantity
+- **alternative**: That gives a choice
+- **analog**: Of data given by pointers and dials
+- **angular**: That has one or more angles
+- **approved**: Permitted by an authority DO THE PROCEDURE
+- **approximate**: Almost correct or accurate
+- **automatic**: That operates without other input
+- **auxiliary**: That operates in a secondary function 2. That gives help
+- **available**: Prepared or supplied for you to use
+- **axial**: Related to an axis
+- **bad**: Not satisfactory
+- **bare**: Without a surface layer or protection
+- **basic**: Approved minimum
+- **blocked**: That prevents correct operation
+- **blunt**: Not sharp
+- **bottom**: That is lowermost
+- **bright**: That gives much light
+- **careful**: With precaution
+- **chemical**: Related to a chemical
+- **circular**: That has the shape of a circle
+- **clean**: That does not include dirt or unwanted material
+- **clear**: Without blockage or interference 2. Easy to understand and without ambiguity
+- **clogged**: Blocked with unwanted material.
+- **cold**: At low temperature
+- **completed**: Successfully brought to an end
+- **constant**: That continues to be the same, without change
+- **cool**: Moderately cold
+- **correct**: That agrees with all that is necessary to the maximum
+- **damaged**: That has or can be affected by damage
+- **dedicated**: That is used only for one purpose
+- **deep**: That has a specified depth
+- **defective**: Unserviceable for operation
+- **different**: Not the same
+- **digital**: Related to digits
+- **dim**: Not bright
+- **dirty**: Not clean
+- **down**: In a position below
+- **downstream**: In the direction of the flow
+- **dry**: Without liquid or moisture
+- **each**: Every one of two or more objects or persons, seen together as a group but identified separately
+- **easy**: Without difficulty
+- **electric**: Operated by electricity
+- **electrical**: Related to electricity
+- **empty**: Without contents
+- **equal**: The same dimension, quality, quantity, or number
+- **expired**: More than the permitted life
+- **explosive**: That can cause an explosion
+- **external**: Of, or on, the outer side
+- **far**: At or to a relatively large distance
+- **fast**: At high speed
+- **filtered**: That has gone through a filter
+- **flammable**: That burns easily
+- **flat**: That has a continuous surface in the same plane
+- **flexible**: That can easily bend again and again
+- **flush**: Of a surface that is level or continuous with another surface
+- **forward**: Nearer to the front
+- **free**: That can move easily
+- **frequent**: That occurs or is found often at short intervals
+- **front**: Nearer to the person that looks or a reference point Refer also to IN FRONT OF.
+- **full**: At or related to maximum travel, length, quantity, or detail
+- **general**: Of, or related to something as a whole, not detailed
+- **glossy**: Smooth and shiny
+- **good**: That is satisfactory
+- **hard**: Not easy to cut, not easy to go into or through
+- **heavy**: That has a large mass, weight, or force
+- **high**: That is of large value
+- **hot**: At a high temperature
+- **hydraulic**: Related to, or operated by, pressurized liquid
+- **important**: That has a significant effect
+- **inboard**: Nearer to the longitudinal axis
+- **incorrect**: Not correct
+- **initial**: That is related to the start
+- **inner**: Nearer to the center of an object
+- **intermittent**: That stops and starts again, not continuous
+- **internal**: Of, or on, the inner side and inner space and inner space
+- **irregular**: Not regular
+- **its**: Belonging to a thing
+- **laminated**: Made of laminations
+- **large**: More than average in dimension, quantity, or capacity
+- **last**: That comes at the end
+- **lateral**: Related to or on the side ADJUST THE LATERAL
+- **left**: On the west side when you look north
+- **less**: Of smaller dimension, value, quantity, volume, or number
+- **level**: Horizontal to a known datum
+- **light**: That has a small mass, weight, or force
+- **linear**: In a straight line
+- **liquid**: That has the properties of a liquid
+- **live**: That includes explosive material For electrical systems, use
+- **local**: Applicable to a given location or position
+- **long**: That has a specified or large length, or a specified or large duration
+- **longitudinal**: Related to the longitudinal axis
+- **loose**: On, in, but not attached 2. Not tight
+- **low**: That is of small value
+- **magnetic**: Related to the properties of a magnet
+- **manual**: Operated with the hands IF THE AUTOMATIC
+- **many**: Of a large number If it is possible, give the range, number, or quantity.
+- **mating**: Made to touch
+- **matt**: Not glossy
+- **maximum**: Related to the largest dimension, quantity, number, or value
+- **medical**: Related to medicine
+- **middle**: At a point that is between two other points
+- **minimum**: Related to the smallest dimension, quantity, number, or value
+- **missing**: That is not there
+- **mobile**: That is made to move easily
+- **moderate**: Between low and high values
+- **moist**: Moderately wet
+- **more**: A large quantity of
+- **most**: To the largest quantity of MOST
+- **movable**: That can move if necessary
+- **much**: Of relatively large dimension, value, quantity, or volume
+- **near**: At or to a relatively short distance
+- **necessary**: That must be
+- **netic**: electromagnetism Related to
+- **neutral**: That has no effect 2. That is not acid or alkaline
+- **new**: Not used before
+- **next**: The first occurrence that follows immediately after in time or sequence.
+- **no**: Not any
+- **off**: Not in operation
+- **on**: In operation
+- **only**: Nothing more or different THIS IS THE ONLY
+- **open**: That lets something go in or out
+- **opposite**: In the other direction THE RESET DEVICE 2. Across from
+- **optional**: Not mandatory
+- **other**: Not the same as that given before
+- **out**: Away from, or not in, a location or position
+- **outboard**: Farther from the longitudinal axis of something
+- **outer**: Located on the outside or farther from the center of an object
+- **parallel**: Along lines that stay a constant distance apart at all points
+- **permanent**: Without a limit in time
+- **permitted**: Allowed
+- **perpendicular**: At a 90 degree angle to a given line or plane
+- **pneumatic**: Related to, or operated by gas pressure
+- **poisonous**: That contains poison
+- **possible**: That can occur
+- **previous**: That goes before in an unspecified time or sequence Be accurate. Use LAST (adj) for the event that occurs immediately before in time or sequence. past
+- **primary**: First in importance
+- **protective**: That gives protection
+- **radial**: Along a radius
+- **radioactive**: Related to radioactivity
+- **random**: Not regular
+- **rear**: Away from the person who looks or from a reference point
+- **regular**: At specified or equal intervals
+- **related**: That has a relation
+- **remaining**: That continues to stay
+- **resistant**: That will help to prevent something
+- **right**: On the east side when you look north
+- **rigid**: That cannot easily bend or change shape
+- **rough**: Not smooth
+- **rounded**: Not angular
+- **safe**: Not dangerous, disarmed
+- **same**: Agrees in all details
+- **satisfactory**: Agrees with all that is necessary
+- **semicircular**: That has the shape of half a circle
+- **sensitive**: That can sense small changes
+- **serviceable**: Correct or satisfactory
+- **sharp**: That can cut or make a hole
+- **shiny**: That can cause a reflection of light
+- **short**: That has small length or duration If it is possible, be accurate.
+- **slow**: At low speed
+- **small**: Less than average in dimension, quantity, quality, or capacity
+- **smooth**: That has a continuous uniform surface 2. That has a constant rate of movement
+- **soft**: Flexible, not hard
+- **solid**: That has the properties of a solid
+- **some**: Related to a quantity not specified
+- **special**: For a specified function
+- **specified**: Given in, identified in, or related to a specification, regulation, or procedure
+- **spherical**: That has the shape of a sphere
+- **stable**: That does not change or move
+- **standard**: Related to equipment and procedures that are normally used
+- **straight**: Without curves or bends MAKE SURE THAT THE
+- **strong**: With much strength, power, or concentration
+- **structural**: Related to the structure
+- **subsequent**: Following in an unspecified time or sequence Use NEXT (adj) for the first occurrence that follows immediately in time or sequence.
+- **such**: Of the same group
+- **sudden**: That occurs in a short time
+- **sufficient**: Not less (or more) than necessary
+- **sure**: Certain
+- **symmetrical**: That has or is with symmetry
+- **synchronized**: That operates at the same time 2. That agrees with
+- **tacky**: Sticky when you touch it WHEN THE
+- **tertiary**: Third in importance
+- **their**: Belonging to persons or things
+- **these**: Refers to specified persons or things
+- **thick**: That has a specified or large thickness
+- **thin**: That has a small thickness
+- **this**: Refers to a specified person or thing
+- **tight**: Not free
+- **top**: That is uppermost
+- **tory**
+- **total**: All of
+- **transparent**: Easy to see through
+- **typical**: That has the important qualities of a group
+- **undemanded**: That occurs without an apparent cause
+- **unknown**: Not known
+- **unserviceable**: Not fit for its purpose
+- **unusual**: Not usual
+- **unwanted**: That must not be there
+- **up**: In a position above
+- **upstream**: In a direction opposite to the flow
+- **usual**: That you use or that occurs most frequently
+- **vertical**: At 90 degrees to the horizon horizon
+- **visual**: That you can see
+- **warm**: Moderately hot
+- **weak**: With small strength, power, or concentration
+- **wet**: That has liquid on it, in it, or absorbed into it
+- **wide**: That has a specified or large width
+- **your**: Related to the reader or the user

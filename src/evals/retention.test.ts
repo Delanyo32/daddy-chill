@@ -19,7 +19,27 @@ test('JSON wrapped in fences and prose still parses', () => {
 		neededRatio: 1,
 		missing: [],
 		unexplained: [],
+		actionable: true,
+		blocker: '',
 	});
+});
+
+test('the actionable verdict and its reason come through', () => {
+	const scored = parseJudgeOutput(
+		'{"total": 6, "covered": 6, "needed": 4, "neededCovered": 4, "actionable": false, "blocker": "never says what vmhwm_mb measures"}',
+	);
+	expect(scored.actionable).toBe(false);
+	expect(scored.blocker).toBe('never says what vmhwm_mb measures');
+});
+
+test('a judge that omits the verdict does not fail the skill for it', () => {
+	// Fails open, unlike the counts, which throw. A missing verdict is a judge slip,
+	// not a finding that nobody could use the answer.
+	expect(parseJudgeOutput('{"total": 4, "covered": 4, "needed": 4, "neededCovered": 4}').actionable).toBe(true);
+	// Anything that is not exactly true is false. "yes" and 1 are not a verdict.
+	expect(
+		parseJudgeOutput('{"total": 4, "covered": 4, "needed": 4, "neededCovered": 4, "actionable": "yes"}').actionable,
+	).toBe(false);
 });
 
 test('dropping background does not count against the gate', () => {

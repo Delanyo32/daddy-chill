@@ -3,12 +3,34 @@ import { describeEval } from 'vitest-evals';
 import { createFlueAgentHarness, promptJudgeAgent, promptPlainAgent } from './harness.ts';
 import { measure, median, type Metrics } from './metrics.ts';
 import { buildJudgeInput, parseJudgeOutput, type Retention } from './retention.ts';
-import prompts from './prompts.json' with { type: 'json' };
+import rawPrompts from './prompts.json' with { type: 'json' };
 
+/**
+ * A band, not a ceiling.
+ *
+ * The old gate was `<= 8` only, so lower always won. That is how a session scored a
+ * median grade of 2.50, five grades under target, while leaving 40 terms undefined
+ * and losing its reader. Explaining a term costs words and clauses, so an answer
+ * that explains its jargon cannot also score like a children's book. Under the floor
+ * means the explanations were cut, not that the writing got clear.
+ */
+const GRADE_FLOOR = 6;
 const GRADE_CEILING = 8;
 const SENTENCE_CEILING = 20;
 const PARAGRAPH_CEILING = 6;
 const ACTIONABLE_FLOOR = 0.8;
+/**
+ * Numbers per 100 words.
+ *
+ * ponytail: calibrated on the failing session, not on a corpus. The two answers that
+ * made the reader ask for something simpler scored 25.3 and 23.6; the answer they
+ * accepted scored 4.4. Retune both after the first full run.
+ */
+const NUMBER_CEILING = 20;
+const NUMBER_MEDIAN_CEILING = 12;
+
+/** A prompt is one question, or a conversation whose last answer gets scored. */
+const prompts = rawPrompts as (string | string[])[];
 
 interface Sample {
 	before: Metrics;
@@ -21,17 +43,20 @@ const samples: Sample[] = [];
 const harness = createFlueAgentHarness({ agentName: process.env.EVAL_AGENT ?? 'daddy-chill' });
 
 describeEval('daddy-chill simplifies without dropping what the reader needs', { harness }, (it) => {
-	for (const prompt of prompts) {
-		it(prompt, async ({ run, signal }) => {
-			const [skilled, baselineText] = await Promise.all([
-				run(prompt),
-				promptPlainAgent(prompt, signal),
-			]);
+	for (const entry of prompts) {
+		const turns = Array.isArray(entry) ? entry : [entry];
+		const question = turns[turns.length - 1]!;
+		const label = turns.length === 1 ? question : `[turn ${turns.length}/${turns.length}] ${question}`;
+
+		it(label, async ({ run, signal }) => {
+			// Both arms hear the same conversation. Only the last answer is scored,
+			// because that is where a session-start instruction has had time to drift.
+			const [skilled, baselineText] = await Promise.all([run(turns), promptPlainAgent(turns, signal)]);
 
 			const after = measure(skilled.output);
 			const before = measure(baselineText);
 			const retention = parseJudgeOutput(
-				await promptJudgeAgent(buildJudgeInput(prompt, baselineText, skilled.output), signal),
+				await promptJudgeAgent(buildJudgeInput(question, baselineText, skilled.output), signal),
 			);
 
 			samples.push({ before, after, retention });
@@ -39,11 +64,12 @@ describeEval('daddy-chill simplifies without dropping what the reader needs', { 
 			// Reported in the JSON eval report, and printed when an assert fails.
 			// Word count is reported, never gated: a clear answer is allowed to be longer.
 			console.log(
-				`\n${prompt}\n` +
+				`\n${label}\n` +
 					`  grade    ${before.grade.toFixed(1)} -> ${after.grade.toFixed(1)}\n` +
 					`  standard ${before.standard.toFixed(1)} -> ${after.standard.toFixed(1)}\n` +
 					`  words    ${before.words} -> ${after.words}\n` +
 					`  jargon   ${(before.difficultRatio * 100).toFixed(1)}% -> ${(after.difficultRatio * 100).toFixed(1)}%\n` +
+					`  numbers  ${before.numberDensity.toFixed(1)} -> ${after.numberDensity.toFixed(1)} per 100 words\n` +
 					`  sent len ${before.avgSentenceLength.toFixed(1)} -> ${after.avgSentenceLength.toFixed(1)} (max ${before.maxSentenceLength} -> ${after.maxSentenceLength})\n` +
 					`  para max ${before.maxParagraphSentences} -> ${after.maxParagraphSentences}\n` +
 					`  tense    ${before.tenseViolations} -> ${after.tenseViolations}\n` +
@@ -51,13 +77,30 @@ describeEval('daddy-chill simplifies without dropping what the reader needs', { 
 					`  needed   ${retention.neededCovered}/${retention.needed} kept (${retention.covered}/${retention.total} of all facts)` +
 					(retention.missing.length ? `, dropped: ${retention.missing.join('; ')}` : '') +
 					'\n' +
-					`  bare     ${retention.unexplained.length ? retention.unexplained.join('; ') : 'none'}`,
+					`  bare     regex: ${after.bare.length ? after.bare.join(', ') : 'none'}\n` +
+					`           judge: ${retention.unexplained.length ? retention.unexplained.join(', ') : 'none'}\n` +
+					`  usable   ${retention.actionable ? 'yes' : `NO: ${retention.blocker}`}`,
 			);
 
 			// Per prompt: things one answer either does or does not do. No baseline needed.
 			expect(after.maxSentenceLength, 'longest sentence').toBeLessThanOrEqual(SENTENCE_CEILING);
 			expect(after.maxParagraphSentences, 'longest paragraph').toBeLessThanOrEqual(PARAGRAPH_CEILING);
 			expect(skilled.output, 'no em dashes').not.toContain('—');
+
+			// The rule the skill kept breaking, now gated from both sides. The regex
+			// proves the floor case (a name shown with no plain words anywhere near it);
+			// the judge catches the lowercase coinages no regex can spot. Six runs
+			// reported these and gated neither, so nobody ever had to fix one.
+			expect(after.bare, 'identifiers shown but never explained').toEqual([]);
+			expect(retention.unexplained, 'hard terms the judge found unexplained').toEqual([]);
+
+			// The only gate that scores understanding instead of form.
+			expect(retention.actionable, `usable by a non-expert${retention.blocker ? `: ${retention.blocker}` : ''}`).toBe(
+				true,
+			);
+
+			expect(after.numberDensity, 'numbers per 100 words').toBeLessThanOrEqual(NUMBER_CEILING);
+
 			// Gated on what a reader needs to act, not on every fact. The baseline
 			// volunteers tangents the question never asked for, so grading against all
 			// of them would mean the only way to pass is to repeat the baseline.
@@ -82,25 +125,31 @@ describeEval('daddy-chill simplifies without dropping what the reader needs', { 
 		if (samples.length === 0) return;
 
 		const med = (pick: (sample: Sample) => number) => median(samples.map(pick));
-		const bare = samples.reduce((n, s) => n + s.retention.unexplained.length, 0);
+		const bare = samples.reduce((n, s) => n + s.after.bare.length + s.retention.unexplained.length, 0);
+		const unusable = samples.filter((s) => !s.retention.actionable).length;
 
 		console.log(
 			`\nmedians over ${samples.length} prompts\n` +
-				`  grade    ${med((s) => s.before.grade).toFixed(2)} -> ${med((s) => s.after.grade).toFixed(2)}\n` +
+				`  grade    ${med((s) => s.before.grade).toFixed(2)} -> ${med((s) => s.after.grade).toFixed(2)}  (band ${GRADE_FLOOR} to ${GRADE_CEILING})\n` +
 				`  standard ${med((s) => s.before.standard).toFixed(2)} -> ${med((s) => s.after.standard).toFixed(2)}\n` +
 				`  words    ${med((s) => s.before.words).toFixed(1)} -> ${med((s) => s.after.words).toFixed(1)}  (reported, not gated)\n` +
 				`  jargon   ${(med((s) => s.before.difficultRatio) * 100).toFixed(2)}% -> ${(med((s) => s.after.difficultRatio) * 100).toFixed(2)}%\n` +
+				`  numbers  ${med((s) => s.before.numberDensity).toFixed(1)} -> ${med((s) => s.after.numberDensity).toFixed(1)} per 100 words\n` +
 				`  sent len ${med((s) => s.before.avgSentenceLength).toFixed(2)} -> ${med((s) => s.after.avgSentenceLength).toFixed(2)}\n` +
 				`  tense    ${med((s) => s.before.tenseViolations).toFixed(1)} -> ${med((s) => s.after.tenseViolations).toFixed(1)}\n` +
 				`  synonyms ${med((s) => s.before.synonymDrift).toFixed(1)} -> ${med((s) => s.after.synonymDrift).toFixed(1)}\n` +
-				`  needed   ${(med((s) => s.retention.neededRatio) * 100).toFixed(1)}% kept, all facts ${(med((s) => s.retention.total ? s.retention.covered / s.retention.total : 1) * 100).toFixed(1)}%\n` +
-				`  bare     ${bare} unexplained terms across ${samples.length} answers (reported, not gated)`,
+				`  needed   ${(med((s) => s.retention.neededRatio) * 100).toFixed(1)}% kept, all facts ${(med((s) => (s.retention.total ? s.retention.covered / s.retention.total : 1)) * 100).toFixed(1)}%\n` +
+				`  bare     ${bare} unexplained terms across ${samples.length} answers\n` +
+				`  unusable ${unusable}/${samples.length} answers a non-expert could not act on`,
 		);
 
 		expect(med((s) => s.after.grade), 'median reading level ceiling').toBeLessThanOrEqual(GRADE_CEILING);
-		expect(med((s) => s.after.grade), 'median reading level vs baseline').toBeLessThan(med((s) => s.before.grade));
+		// The floor is the new half. Scoring below it means explanation was cut, not
+		// that the prose got clearer, so "simpler" can no longer be gamed downward.
+		expect(med((s) => s.after.grade), 'median reading level floor').toBeGreaterThanOrEqual(GRADE_FLOOR);
 		expect(med((s) => s.after.difficultRatio), 'median jargon vs baseline').toBeLessThan(med((s) => s.before.difficultRatio));
 		expect(med((s) => s.after.avgSentenceLength), 'median sentence length ceiling').toBeLessThanOrEqual(SENTENCE_CEILING);
+		expect(med((s) => s.after.numberDensity), 'median numbers per 100 words').toBeLessThanOrEqual(NUMBER_MEDIAN_CEILING);
 		expect(med((s) => s.after.tenseViolations), 'median tense violations vs baseline').toBeLessThanOrEqual(med((s) => s.before.tenseViolations));
 		expect(med((s) => s.after.synonymDrift), 'median synonym drift vs baseline').toBeLessThanOrEqual(med((s) => s.before.synonymDrift));
 

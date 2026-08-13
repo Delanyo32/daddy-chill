@@ -9,21 +9,32 @@ export const BASE_URL = process.env.FLUE_BASE_URL ?? 'http://127.0.0.1:3583';
 
 const client = createFlueClient({ baseUrl: BASE_URL });
 
-async function prompt(agentName: string, input: string, signal?: AbortSignal) {
+/**
+ * Run a whole conversation and return the last answer.
+ *
+ * Every turn reuses one instance id on purpose. Flue gives each agent instance one
+ * canonical conversation stream and rebuilds context from it, so turn 3 sees turns
+ * 1 and 2. A fresh id per turn would make a multi-turn prompt three unrelated
+ * questions, which is exactly the drift these prompts exist to catch.
+ */
+async function converse(agentName: string, turns: string[], signal?: AbortSignal) {
 	const instanceId = `eval-${crypto.randomUUID()}`;
-	const invocation = await client.agents.prompt(agentName, instanceId, { message: input, signal });
-	return invocation.result;
+	let last!: Awaited<ReturnType<typeof client.agents.prompt>>;
+	for (const message of turns) {
+		last = await client.agents.prompt(agentName, instanceId, { message, signal });
+	}
+	return last.result;
 }
 
 export function createFlueAgentHarness(options: { agentName: string }) {
-	return createHarness<string, string>({
+	return createHarness<string[], string>({
 		name: `flue-${options.agentName}-agent`,
 		run: async ({ input, signal }) => {
-			const result = await prompt(options.agentName, input, signal);
+			const result = await converse(options.agentName, input, signal);
 			return {
 				output: result.text,
 				messages: [
-					{ role: 'user' as const, content: input },
+					...input.map((content) => ({ role: 'user' as const, content })),
 					{ role: 'assistant' as const, content: result.text },
 				],
 				usage: {
@@ -39,11 +50,11 @@ export function createFlueAgentHarness(options: { agentName: string }) {
 }
 
 /** Control arm. Called directly, not through a harness, because it is the baseline. */
-export async function promptPlainAgent(input: string, signal?: AbortSignal): Promise<string> {
-	return (await prompt('plain', input, signal)).text;
+export async function promptPlainAgent(turns: string[], signal?: AbortSignal): Promise<string> {
+	return (await converse('plain', turns, signal)).text;
 }
 
 /** The ruler. Not an arm of the benchmark, so it does not run through a harness either. */
 export async function promptJudgeAgent(input: string, signal?: AbortSignal): Promise<string> {
-	return (await prompt('judge', input, signal)).text;
+	return (await converse('judge', [input], signal)).text;
 }

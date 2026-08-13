@@ -1,8 +1,13 @@
 import { expect, test } from 'vitest';
 import {
+	bareIdentifiers,
+	difficultRatio,
+	identifiers,
+	looksTechnical,
 	maxParagraphSentences,
 	measure,
 	median,
+	numberDensity,
 	synonymDrift,
 	tenseViolations,
 	toProse,
@@ -80,6 +85,66 @@ test('present perfect and progressive verbs are flagged', () => {
 test('synonyms for one idea are counted', () => {
 	expect(synonymDrift('Verify the input, then check the output, then confirm it.')).toBe(2);
 	expect(synonymDrift('Check the input, then check the output.')).toBe(0);
+});
+
+test('repeating a hard word no longer improves the jargon score', () => {
+	// The shipped version divided a SET of hard words by total words, so the same
+	// sentence ten times scored 0.050 against 0.500. This is that regression.
+	expect(difficultRatio('Quantization matters.')).toBeCloseTo(0.5);
+	expect(difficultRatio('Quantization matters. '.repeat(10))).toBeCloseTo(0.5);
+});
+
+test('identifier shapes are recognised, English words are not', () => {
+	for (const token of ['RSS', 'PCIe', 'NVMe', 'MADV_WILLNEED', 'vmhwm_mb', 'assignLayers', 'x86'])
+		expect(looksTechnical(token), token).toBe(true);
+	for (const token of ['login', 'cache', 'the', 'buffer', 'Set']) expect(looksTechnical(token), token).toBe(false);
+	// English words in caps are not terms. The first full run flagged a SQL example.
+	for (const token of ['SELECT', 'FROM', 'WHERE', 'ON', 'ORDER', 'JOIN']) expect(looksTechnical(token), token).toBe(false);
+	// Units a reader already knows. p99 and rps are still jargon.
+	for (const token of ['MB', 'GB', 'ms']) expect(looksTechnical(token), token).toBe(false);
+	for (const token of ['p99', 'QPS']) expect(looksTechnical(token), token).toBe(true);
+});
+
+test('a sentence-ending period is not part of the identifier', () => {
+	// "TARGET_DIRECTORY." used to be its own token, so no gloss could ever match it.
+	expect(identifiers('Set TARGET_DIRECTORY. It is the folder the script empties.')).toEqual(['TARGET_DIRECTORY']);
+	expect(bareIdentifiers('Set TARGET_DIRECTORY. It is the folder that the script empties for you.')).toEqual([]);
+});
+
+test('a one-word inline code span is an identifier even when its shape is plain', () => {
+	expect(identifiers('Run `pnpm` first.')).toEqual(['pnpm']);
+	// Multi-word spans are commands, not terms being named.
+	expect(identifiers('Run `git rebase main` first.')).toEqual([]);
+});
+
+test('an explained identifier passes and a bare one fails', () => {
+	const explained = 'Set `revisionHistoryLimit`. It is the number of old versions that the cluster keeps on disk.';
+	expect(bareIdentifiers(explained)).toEqual([]);
+	expect(bareIdentifiers('Set `revisionHistoryLimit`. Then redeploy.')).toEqual(['revisionHistoryLimit']);
+});
+
+test('column labels that never leave the code fence are bare', () => {
+	// This is the exact shape that failed the reader: a results table, no gloss.
+	expect(bareIdentifiers('Results below.\n\n```\nread_mb 356.3\nvmhwm_mb 129.9\n```')).toEqual([
+		'read_mb',
+		'vmhwm_mb',
+	]);
+});
+
+test('numbers are counted per 100 words, including inside tables', () => {
+	expect(numberDensity('The build failed twice today.')).toBe(0);
+	// 2 numbers over 2 words: a bare results table is as dense as text gets.
+	expect(numberDensity('read_mb 356.3\nvmhwm_mb 129.9')).toBe(100);
+	// The same two numbers carried by a sentence.
+	expect(numberDensity('The stream arm held 129.9 MB and read 356.3 MB.')).toBeLessThan(30);
+});
+
+test('a table of measurements scores harder than the same claim in words', () => {
+	const table = measure('Results.\n\n```\nread_mb 356.3 359.5 341.3\nvmhwm_mb 129.9 46.0 73.1\n```');
+	const words = measure('The stream arm held less memory than the full arm, and read fewer bytes.');
+
+	expect(table.numberDensity).toBeGreaterThan(words.numberDensity);
+	expect(table.bare.length).toBeGreaterThan(words.bare.length);
 });
 
 test('median ignores one runaway value', () => {

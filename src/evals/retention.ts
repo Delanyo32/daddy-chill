@@ -30,10 +30,21 @@ export interface Retention {
 	 * Hard terms the short answer used but never explained.
 	 *
 	 * Some terms cannot be swapped for an easy word: a command, a flag, a config
-	 * key. The rule is to keep them and explain them, so this reports the ones that
-	 * arrived bare. Reported, not gated: the judge is loose about what counts as hard.
+	 * key. The rule is to keep them and explain them, so this lists the ones that
+	 * arrived bare. This is now gated. It was reported and ignored for six runs,
+	 * which is how a session shipped 40 undefined terms at a grade-2.5 reading level.
 	 */
 	unexplained: string[];
+	/**
+	 * Could a non-expert act on this answer without asking a follow-up?
+	 *
+	 * The only gate that scores understanding rather than form. Every other metric
+	 * here can be satisfied by an answer that is short, plain, complete, and still
+	 * unusable, because it names things it never explains.
+	 */
+	actionable: boolean;
+	/** Why not, in one sentence. Printed on failure. */
+	blocker: string;
 }
 
 export function buildJudgeInput(question: string, reference: string, candidate: string): string {
@@ -80,8 +91,12 @@ export function parseJudgeOutput(raw: string): Retention {
 		neededCovered,
 		neededRatio: needed === 0 ? 1 : neededCovered / needed,
 		missing: Array.isArray(parsed.missing) ? parsed.missing.map(String) : [],
-		// ponytail: optional. It is reported, not gated, so a judge that omits it
-		// should not throw the way a missing count does.
 		unexplained: Array.isArray(parsed.unexplained) ? parsed.unexplained.map(String) : [],
+		// Default true, unlike the counts, which throw when absent. Both gates fail
+		// closed on a real judgement and open on a judge slip: a missing count would
+		// read as "dropped everything", a missing verdict as "nobody could use this".
+		// Neither is a fact about the skill, so neither should fail it.
+		actionable: parsed.actionable === undefined ? true : parsed.actionable === true,
+		blocker: typeof parsed.blocker === 'string' ? parsed.blocker : '',
 	};
 }
