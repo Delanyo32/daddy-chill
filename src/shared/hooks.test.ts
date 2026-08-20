@@ -21,10 +21,36 @@ function run(hook: string, input: object, env: Record<string, string> = {}): str
 	});
 }
 
-test('an ordinary message re-sends the rules when the mode is on', () => {
+test('an ordinary message nudges when the mode is on', () => {
 	run('claude-prompt-submit.mjs', { prompt: '/daddy-chill on', session_id: 'on-session' });
 	const out = run('claude-prompt-submit.mjs', { prompt: 'why is the build slow?', session_id: 'on-session' });
-	expect(JSON.parse(out).hookSpecificOutput.additionalContext).toContain('Gloss every term');
+	expect(JSON.parse(out).hookSpecificOutput.additionalContext).toContain('Apply them to this answer');
+});
+
+test('the nudge does not carry the rules', () => {
+	// The whole point of the change. The rules are over 1,500 words, and paying that
+	// on every message is what the nudge replaced. If this ever passes by accident,
+	// the per-turn cost is back.
+	run('claude-prompt-submit.mjs', { prompt: '/daddy-chill on', session_id: 'nudge' });
+	const nudge = JSON.parse(
+		run('claude-prompt-submit.mjs', { prompt: 'why is the build slow?', session_id: 'nudge' }),
+	).hookSpecificOutput.additionalContext;
+
+	expect(nudge).not.toContain('## Cut the slop');
+	expect(nudge).not.toContain('## Gloss every term');
+	expect(nudge.length).toBeLessThan(1000);
+});
+
+test('session start still sends the whole skill', () => {
+	const out = run('claude-session-start.mjs', { session_id: 'on-session' });
+	const context = JSON.parse(out).hookSpecificOutput.additionalContext;
+	expect(context).toContain('## Gloss every term');
+	expect(context).toContain('## Cut the slop');
+});
+
+test('turning the mode on sends the whole skill, not the nudge', () => {
+	const out = run('claude-prompt-submit.mjs', { prompt: '/daddy-chill on', session_id: 'command' });
+	expect(JSON.parse(out).hookSpecificOutput.additionalContext).toContain('## Gloss every term');
 });
 
 test('an ordinary message sends nothing when the mode is off', () => {
@@ -46,11 +72,17 @@ test('the codex host announces a command but stays silent on an ordinary message
 	const ordinary = run('claude-prompt-submit.mjs', { prompt: 'why is the build slow?', session_id: 'codex' }, { PLUGIN_DATA: '1' });
 	const parsed = JSON.parse(ordinary);
 	expect(parsed.systemMessage).toBeUndefined();
-	expect(parsed.hookSpecificOutput.additionalContext).toContain('Gloss every term');
+	expect(parsed.hookSpecificOutput.additionalContext).toContain('Apply them to this answer');
 });
 
-test('copilot re-sends the rules on an ordinary message', () => {
+test('copilot nudges on an ordinary message', () => {
 	run('copilot-prompt-submit.mjs', { prompt: '/daddy-chill on', session_id: 'copilot' });
 	const out = run('copilot-prompt-submit.mjs', { prompt: 'why is the build slow?', session_id: 'copilot' });
-	expect(JSON.parse(out).additionalContext).toContain('Gloss every term');
+	expect(JSON.parse(out).additionalContext).toContain('Apply them to this answer');
+});
+
+test('gemini nudges on an ordinary message', () => {
+	run('gemini-before-agent.mjs', { prompt: '/daddy-chill on', session_id: 'gemini' });
+	const out = run('gemini-before-agent.mjs', { prompt: 'why is the build slow?', session_id: 'gemini' });
+	expect(JSON.parse(out).hookSpecificOutput.additionalContext).toContain('Apply them to this answer');
 });

@@ -65,7 +65,8 @@ the answer explained a term in the sentence that used it.
 | Tier | Contains | Rank |
 | --- | --- | --- |
 | **Gloss every term** | answer first, gloss every hard term, idea before number, gloss column labels, warning first, everything needed to act | wins every conflict |
-| **Style** | sentence length, paragraph length, tenses, synonyms, noun stacks, active voice, em dashes | never wins against the tier above |
+| **Cut the slop** | the 31 `unslop` rules, verbatim, plus `Adding soul` | loses to the tier above, beats the tier below |
+| **Style** | sentence length, paragraph length, tenses, synonyms, noun stacks, active voice, em dashes | the default, not the ceiling |
 
 One line makes the tie-break explicit: **write two sentences rather than drop a gloss.**
 
@@ -179,6 +180,29 @@ Flesch-Kincaid grade of 2.5. The reader could not use it.
 `bareIdentifiers` in `src/evals/metrics.ts` now reads the raw markdown and closes that
 half. See [what the benchmark checks](./benchmark.md).
 
+## The per-turn nudge
+
+Session start sends the whole skill. Every turn after that sends this instead:
+
+> Daddy Chill is on. The full rules went out at the start of this session. Apply them
+> to this answer. Before you send, check the answer against every rule: answer first,
+> no bare terms, exact code, plain words, active voice, no em dash, no slop.
+
+The hooks used to re-send the rules on every message, because after ten tool calls the
+session-start copy is tens of thousands of tokens back in the transcript and the style
+drifts. That worked, and it cost the full rules every message.
+
+The nudge is 461 characters. The rules are 9,480. The copy is still in the transcript,
+so the nudge points at it instead of repeating it.
+
+`getTurnReminder` in `runtime/instructions.mjs` holds the text. Three hooks call it:
+`claude-prompt-submit.mjs`, `copilot-prompt-submit.mjs`, and `gemini-before-agent.mjs`.
+Session start, subagent start, and `/daddy-chill on` still send the whole skill.
+
+Keep it short. `src/shared/hooks.test.ts` fails if the nudge ever carries a section
+heading from the rules, or grows past 1,000 characters. Past that it is the old
+behaviour again under a new name.
+
 ## One copy, two places
 
 The rules live in `skills/daddy-chill/SKILL.md`. `src/shared/rules.ts` holds a
@@ -189,8 +213,124 @@ description.
 `src/shared/rules.test.ts` fails if the two drift apart. Edit `SKILL.md`, then paste
 into `rules.ts`, and the test tells you if you missed.
 
+## The second source
+
+**unslop** is a skill in Cursor's plugin set. It lists 31 patterns that mark text as
+AI-written, and the fix for each.
+
+- https://github.com/cursor/plugins/blob/main/pstack/skills/unslop/SKILL.md
+
+STE and unslop solve different halves of the same problem. STE makes a sentence easy to
+parse: short, active, one idea, simple tense. It says nothing about whether the sentence
+carries information. unslop is the other half. "This is a pivotal moment in the evolving
+landscape of builds" obeys every STE rule and every daddy-chill gate. It reads at a
+Flesch-Kincaid grade of 5.9, runs 11 words, uses active voice, and stacks no nouns. It
+also tells the reader nothing.
+
+That answer used to pass the benchmark clean. Now it fails on `slop`.
+
+### What we took
+
+All 31 rules, plus the `Adding soul` section, copied word for word into `SKILL.md`.
+Nothing was summarised, and nothing was left out.
+
+The copy is checked, not trusted. Undo the heading demotion and the section is character
+for character identical to the source file.
+
+### Rank, not exclusion
+
+`SKILL.md` already ranked its rules, so the new section slots in at the bottom:
+
+| Rank | Section | Wins against |
+| --- | --- | --- |
+| 1 | Gloss every term | everything |
+| 2 | Cut the slop | Style |
+| 3 | Style | nothing |
+
+That settles the collisions without editing a word of the source.
+
+`Cut the slop` sits above `Style` on purpose. Ranking it below would have left the
+20-word cap and the bullets-first rule beating "vary rhythm" and "let some mess in"
+every time, so the section would have shipped and changed nothing. Style is now the
+default, not the ceiling.
+
+`Gloss every term` still wins over both. Mess in the rhythm is never a licence for a
+bare term. Every clash and its ruling is written down in
+`skills/daddy-chill/references/slop.md`, including the colon rule, the parentheses ban,
+and the inline-header rule that would otherwise read as an attack on glosses.
+
+Five of the 31 restate rules the skill already had: em dashes, active voice, plain
+words, split dense sentences, and one word one meaning. The repeat stays, because the
+section is verbatim.
+
+### What it costs
+
+`SKILL.md` went from 484 words to 1,541.
+
+At the time, the hooks re-sent the whole file on every turn, so that was about 1,400
+extra tokens per message. That is what killed the 422-word approved-words list once
+before.
+
+It is not what happens now. Session start sends the rules once, and every turn after
+that sends a nudge of about 90 words instead. See [the per-turn nudge](#the-per-turn-nudge).
+
+The token argument is settled, so the section has to earn its place a different way.
+`slop` is gated. If the rules do not move that number, they have the same defence the
+word list had, which is none.
+
+### The gates that fought it are gone
+
+`Adding soul` asks for varied rhythm and deliberate mess. Five gates asked for the
+opposite, so five gates were removed:
+
+| Removed gate | The rule it fought |
+| --- | --- |
+| longest sentence `<= 20` | "Vary rhythm. Then longer ones that take their time." |
+| avg sentence length `<= 20` | the same rule, across the set |
+| longest paragraph `<= 6` | "Let some mess in." |
+| numbers per 100 words | "significantly improves becomes the measured delta" |
+| reading grade floor `>= 6` | every rule that swaps a long word for a plain one |
+
+All five are still measured and still printed. Nothing fails a run for hitting one.
+What is left gates meaning instead of form: zero bare terms, a non-expert can act on
+it, and the facts needed to act survive. See
+[what stopped being a gate](./benchmark.md#what-stopped-being-a-gate).
+
+The grade floor is the one to watch. It was added because a session scored a median
+grade of 2.50 while leaving 40 terms undefined. Three gates now catch that same failure
+from the meaning side, and none of them existed when the floor was written. If a run
+scores low and still passes them, the floor was measuring the wrong thing.
+
+### The rank had to move too
+
+Removing a gate stops the benchmark failing a long sentence. It does not tell the model
+to write one. `Style` said 20 words and outranked `Cut the slop`, so "vary rhythm" would
+have lost every time and the section would have shipped without changing a word of the
+output.
+
+So the rank moved. `Cut the slop` now beats `Style`, and `Style` is the default rather
+than the ceiling.
+
+### How it is measured
+
+`slopPhrases` in `src/evals/metrics.ts` counts the countable rules: the vocabulary in
+rules 1, 4, 7, 8, 20, 23, 25, 26, and 31, plus the "not just X, but Y" shape. The rules
+that need judgement stay with the judge agent.
+
+The gate is a comparison against the plain baseline, not a flat zero. The list has known
+false positives, `realm` and `landscape` have literal uses, and both arms get the same
+ruler, so a shared false-positive rate cancels out. That is the same reasoning already
+used for tense violations and synonym drift. Retune to a flat ceiling after the first
+full run.
+
+Five ambiguous metaphor nouns unslop lists are left out of the counter on purpose:
+`surface`, `vector`, `primitive`, `harness`, and `wedge`. Each has a common literal
+sense. They stay in `SKILL.md`, because the model can tell the senses apart and a regex
+cannot.
+
 ## Sources
 
+- https://github.com/cursor/plugins/blob/main/pstack/skills/unslop/SKILL.md
 - https://www.asd-ste100.org/
 - https://en.wikipedia.org/wiki/Simplified_Technical_English
 - https://www.techscribe.co.uk/techw/asd-simplified-technical-english.htm

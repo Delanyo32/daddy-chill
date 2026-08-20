@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import fs from 'node:fs';
-import { formatCommandResult, handleCommand, getDisabledInstructions, getInstructions } from '../runtime/command.mjs';
+import { formatCommandResult, handleCommand, getDisabledInstructions, getInstructions, getTurnReminder } from '../runtime/command.mjs';
 import { resolveSessionMode } from '../runtime/mode.mjs';
 
 let input = {};
@@ -14,8 +14,8 @@ if (result) {
     ? (result.mode === 'on' ? getInstructions('on') : getDisabledInstructions())
     : formatCommandResult(result);
 } else if (resolveSessionMode('copilot', sessionId) === 'on') {
-  // Ordinary message, rules on: re-send them so the style survives long sessions.
-  context = getInstructions('on');
+  // Ordinary message, rules on: nudge, do not re-send. See getTurnReminder.
+  context = getTurnReminder('on');
 }
 
 process.stdout.write(context ? JSON.stringify({ additionalContext: context }) : '{}');

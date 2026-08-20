@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import fs from 'node:fs';
-import { formatCommandResult, handleCommand, getDisabledInstructions, getInstructions } from '../runtime/command.mjs';
+import { formatCommandResult, handleCommand, getDisabledInstructions, getInstructions, getTurnReminder } from '../runtime/command.mjs';
 import { resolveSessionMode } from '../runtime/mode.mjs';
 
 let input = {};
@@ -16,7 +16,8 @@ if (result) {
     ? (result.mode === 'on' ? getInstructions('on') : getDisabledInstructions())
     : formatCommandResult(result);
 } else if (mode === 'on') {
-  context = getInstructions(mode);
+  // Ordinary message: nudge, do not re-send the rules. See getTurnReminder.
+  context = getTurnReminder(mode);
 }
 
 if (context) {

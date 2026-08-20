@@ -23,6 +23,33 @@ export function getInstructions(mode = 'on') {
   ].join('\n');
 }
 
+/**
+ * The per-turn nudge.
+ *
+ * SessionStart sends the whole skill once. Re-sending it on every message kept the
+ * rules close but cost their full length every turn, and the skill is now over 1,500
+ * words. This is the pointer instead: name the rules, name the checks, and let the
+ * model re-read the copy already in its context.
+ *
+ * Keep it short. The moment this grows past a screen it is the old behaviour again
+ * under a new name.
+ */
+export function getTurnReminder(mode = 'on') {
+  if (mode === 'off') return '';
+  return [
+    'Daddy Chill is on. The full rules went out at the start of this session. Apply them to this answer.',
+    '',
+    'Before you send, check the answer against every rule:',
+    '- Answer first.',
+    '- No bare terms. Gloss each hard term on first use.',
+    '- Keep code, commands, paths, and config keys exact.',
+    '- Plain words. Active voice. No em dash.',
+    '- No slop. Cut puffery, filler, hedging, and the closing summary.',
+    '',
+    'If you cannot recall a rule, re-read the Daddy Chill rules before you answer.',
+  ].join('\n');
+}
+
 export function getDisabledInstructions() {
   return [
     'DADDY CHILL IS OFF FOR THIS SESSION.',

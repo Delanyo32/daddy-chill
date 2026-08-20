@@ -44,10 +44,14 @@ Things a single answer either does or does not do. No baseline needed.
 
 | Metric | Gate | What it catches |
 | --- | --- | --- |
-| Longest sentence | `<= 20` | one run-on hiding behind a good average |
-| Longest paragraph | `<= 6` | walls of text |
+| Bare identifiers | `0` | a command, key, or column label shown with no plain words near it |
+| Unexplained hard terms | `0` | the same failure, caught by the judge instead of a regex |
+| Usable by a non-expert | `true` | an answer the reader cannot act on without a follow-up question |
 | Em dash count | `0` | banned punctuation |
 | Facts needed to act | `>= 80%`, or 1 dropped | a step the reader cannot proceed without |
+
+Every gate here scores meaning. The form gates that used to sit alongside them are
+gone. See [what stopped being a gate](#what-stopped-being-a-gate).
 
 The needed-facts gate tolerates a single dropped fact on purpose. A ratio gate has a
 denominator problem: with 4 needed facts the only reachable scores are 1.0, 0.75, and
@@ -55,20 +59,17 @@ denominator problem: with 4 needed facts the only reachable scores are 1.0, 0.75
 Two dropped facts fails at any size, and the median gate below catches loss spread
 thinly across every prompt.
 
-Longest sentence matters more than the average. Four short bullets pull an average
-down to 7 words, so a single 40-word sentence passes an average gate untouched.
-
 ## Median gates
 
 Reading level swings with the question, so these run across all 20 prompts at once.
 
 | Metric | Gate | What it catches |
 | --- | --- | --- |
-| Flesch-Kincaid grade | `<= 8` and below baseline | reading level |
+| Flesch-Kincaid grade | `<= 8` | reading level |
 | Difficult-word ratio | below baseline | jargon |
-| Avg sentence length | `<= 20` words | long sentences |
 | Tense violations | at or below baseline | non-simple tenses |
 | Synonym drift | at or below baseline | many words, one idea |
+| Slop phrases | at or below baseline | AI tells every other metric scores as easy |
 | Facts needed to act | `>= 80%` | steady, thin loss of steps |
 
 The difficult-word ratio is the share of words outside the Dale-Chall list of 3,000
@@ -83,7 +84,11 @@ Median, not mean. One refusal or one runaway answer should not move the number.
 | --- | --- |
 | Word count | brevity is not a goal. A clear answer is allowed to be longer. |
 | All facts kept | the control is verbose by design, so its tangents are not a target. |
-| Unexplained hard terms | the judge is loose about what counts as hard. Gating it now would fail on noise. |
+| Longest sentence | the `unslop` rules ask for varied rhythm. See below. |
+| Avg sentence length | same rule, measured across the set. |
+| Longest paragraph | "let some mess in" is now a rule the skill ships. |
+| Numbers per 100 words | two `unslop` rules tell the answer to replace a vague word with a number. |
+| Reading grade floor | every `unslop` rule pushes the score down. A floor would fight all of them. |
 
 The benchmark used to gate word count and "facts per 100 words". Both are gone.
 Measurement showed the compression goal was raising the reading level, because the
@@ -140,24 +145,44 @@ goes where.
 This is the only gate that scores understanding instead of form. Every other number here
 can be satisfied by an answer that is short, plain, complete, and unusable.
 
+## What stopped being a gate
+
+`SKILL.md` now ships the `unslop` rules word for word, and five gates told the answer
+the opposite of what those rules ask for. All five were removed. Every one of them is
+still measured and still printed.
+
+| Removed gate | The rule it fought |
+| --- | --- |
+| longest sentence `<= 20` | "Vary rhythm. Short sentences. Then longer ones that take their time." |
+| avg sentence length `<= 20` | the same rule, across the set |
+| longest paragraph `<= 6` | "Let some mess in. Perfect structure looks machine-made." |
+| numbers per 100 words, `20` and `12` | "significantly improves becomes the measured delta", and "the fix names the mechanism or a number" |
+| reading grade floor `>= 6` | rules 7, 23, 28, 30, and 31, which all swap a long word for a plain one |
+
+A long sentence a reader understands was never the failure this skill exists to stop.
+What is left gates meaning: zero bare terms, a non-expert can act on it, and the facts
+needed to act survive.
+
+### The grade floor is the one to watch
+
+The floor existed for a reason. The gate used to be `grade <= 8` alone, so lower always
+won, and a real session held a median grade of 2.50 while leaving 40 terms undefined.
+The floor caught that.
+
+Three gates now cover the same failure from the meaning side: `bareIdentifiers`, the
+judge's `unexplained` list, and `actionable`. All three were added after that session,
+and none of them existed when the floor was written. If a run scores a very low grade
+and still passes those three, the floor was measuring the wrong thing. If it scores low
+and fails them, put the floor back.
+
 ## Numbers per 100 words
 
 A wall of measurements reads as hard whatever the grade says. `numberDensity` counts
-numbers per 100 words on the raw markdown, so tables count.
+numbers per 100 words on the raw markdown, so tables count. It is reported, not gated.
 
-The cap is calibrated on one failing session, not a corpus. The two answers that made
-the reader ask for something simpler scored 25.3 and 23.6. The answer they accepted
-scored 4.4. Per answer the cap is 20, and the median cap is 12. Retune both after a
-full run.
-
-## The reading level is a band
-
-The gate used to be `grade <= 8`. Lower always won, so nothing stopped the score falling.
-A real session held a median grade of 2.50 while leaving 40 terms undefined.
-
-The gate is now 6 to 8. Explaining a term costs words and clauses, so an answer that
-explains its jargon cannot also read like a children's book. Scoring under the floor
-means explanation was cut, not that the writing got clearer.
+The old caps, 20 per answer and a median of 12, were calibrated on one failing session.
+The two answers that made the reader ask for something simpler scored 25.3 and 23.6.
+The answer they accepted scored 4.4. Those numbers are the reason to keep printing it.
 
 ## Notes on the measurement
 
@@ -184,6 +209,17 @@ means explanation was cut, not that the writing got clearer.
 - **Bullets are not paragraphs.** The paragraph gate skips bullets, headings, and table
   rows. The skill asks for bullets, and a bullet is one idea by rule, so a long list is
   not a wall of text.
+- **Slop is the gap every other metric leaves open.** "This is a pivotal moment in the
+  evolving landscape" scores a grade of 5.9, has no long sentence, and hides no bare
+  identifier. It passes every gate above and tells the reader nothing. `slopPhrases` in
+  `src/evals/metrics.ts` counts a fixed list of AI tells instead. The list is the
+  countable half of the rules; the ones that need judgement stay with the judge.
+- **The skill now carries a rule that fights its own gates.** `SKILL.md` ships the
+  `unslop` section word for word, and that section asks for varied rhythm and "let some
+  mess in". The sentence cap and the gloss rule outrank it, and
+  `skills/daddy-chill/references/slop.md` records every clash. The gates that fought
+  those rules are gone, so watch the printed numbers instead: `maxSentenceLength`,
+  `maxParagraphSentences`, `numberDensity`, and `grade`.
 - **Tense violations and synonym drift are regex, not a parser.** "is interesting" reads
   as a progressive verb, and "verifies" is missed because only exact word forms match.
   Both arms get the same ruler, so a shared error rate cancels out. That is why they are
@@ -197,7 +233,7 @@ means explanation was cut, not that the writing got clearer.
 
 ## Unit tests
 
-`pnpm test` runs 23 tests against the scoring code with no API key and no model calls.
+`pnpm test` runs 43 tests against the scoring code with no API key and no model calls.
 Every metric is a pure function with a fixture. It covers the markdown-to-prose
 conversion, each new STE metric, the median, the judge output parser, and the
 rules-drift check.
