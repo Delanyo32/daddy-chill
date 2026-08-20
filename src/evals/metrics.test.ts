@@ -8,6 +8,7 @@ import {
 	measure,
 	median,
 	numberDensity,
+	slopPhrases,
 	synonymDrift,
 	tenseViolations,
 	toProse,
@@ -145,6 +146,30 @@ test('a table of measurements scores harder than the same claim in words', () =>
 
 	expect(table.numberDensity).toBeGreaterThan(words.numberDensity);
 	expect(table.bare.length).toBeGreaterThan(words.bare.length);
+});
+
+test('slop survives every readability formula, so it needs its own ruler', () => {
+	// Grade 5.9, no long sentence, no hard identifier. Every other metric passes it.
+	const puff = 'This is a pivotal moment in the evolving landscape of builds.';
+	expect(measure(puff).grade).toBeLessThanOrEqual(8);
+	expect(measure(puff).slop).toEqual(['pivotal', 'landscape']);
+});
+
+test('the same fact stated plainly scores zero slop', () => {
+	expect(measure('The build got 4 seconds faster.').slop).toEqual([]);
+});
+
+test('the longer phrase wins over the word inside it', () => {
+	expect(slopPhrases('It is a testament to the team.')).toEqual(['a testament to']);
+});
+
+test('slop shapes are caught, not just slop words', () => {
+	expect(slopPhrases('It is not just faster, but cheaper.')).toEqual(['not just faster, but']);
+	expect(slopPhrases('In order to fix it, restart.')).toEqual(['in order to']);
+});
+
+test('slop is counted on prose, so a code block cannot trip it', () => {
+	expect(measure('Run it.\n\n```\nrealm --robust\n```').slop).toEqual([]);
 });
 
 test('median ignores one runaway value', () => {

@@ -5,7 +5,7 @@ import {
   writeDefaultMode,
   writeSessionMode,
 } from './mode.mjs';
-import { getDisabledInstructions, getInstructions, getStatus } from './instructions.mjs';
+import { getDisabledInstructions, getInstructions, getStatus, getTurnReminder } from './instructions.mjs';
 
 export function handleCommand(text, host, sessionId) {
   const command = parseCommand(text);
@@ -34,4 +34,4 @@ export function setDefaultMode(mode) {
   return writeDefaultMode(mode);
 }
 
-export { getDisabledInstructions, getInstructions };
+export { getDisabledInstructions, getInstructions, getTurnReminder };

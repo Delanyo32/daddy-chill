@@ -31,6 +31,8 @@ export interface Metrics {
 	tenseViolations: number;
 	/** Extra words used for one idea. STE: one word, one meaning. */
 	synonymDrift: number;
+	/** AI tells the readability formulas score as easy. See `slopPhrases`. */
+	slop: string[];
 }
 
 /**
@@ -110,6 +112,118 @@ export function synonymDrift(prose: string): number {
 		const hits = set.filter((word) => words.has(word)).length;
 		return total + Math.max(0, hits - 1);
 	}, 0);
+}
+
+/**
+ * Slop phrases: the AI tells that every readability formula scores as easy.
+ *
+ * Grade level, jargon ratio, and sentence length all pass "This is a pivotal
+ * moment in the evolving landscape." Nothing in the file before this line could
+ * see it, so the skill was never scored on the half of clarity that is word
+ * choice rather than word length.
+ *
+ * Taken from the `unslop` skill (cursor/plugins), the same source as the
+ * "Cut the slop" section of SKILL.md. See skills/daddy-chill/references/slop.md.
+ *
+ * ponytail: a word list, not a parser. It covers the countable rules only, which
+ * are unslop rules 1, 4, 7, 8, 20, 23, 25, 26, and 31, plus the "not just X, but
+ * Y" shape. The rules that need judgement ("say what it does, not how it feels",
+ * "cut a sentence that would fit another project") stay with the judge agent in
+ * src/agents/judge.ts.
+ *
+ * Deliberately omits the ambiguous metaphor nouns unslop lists (`surface`,
+ * `vector`, `primitive`, `harness`, `wedge`). Each has a common literal sense,
+ * and a false positive here costs more than a miss: the gate is a comparison
+ * against the plain baseline, so a term both arms use tells us nothing.
+ */
+const SLOP_PHRASES = [
+	// Phrases first: alternation is leftmost-first, so `a testament to` has to
+	// beat `testament` to the same position or the longer hit is never reported.
+	'a testament to',
+	'it is important to note',
+	"it's important to note",
+	'it is worth noting',
+	'due to the fact that',
+	'at the end of the day',
+	'when it comes to',
+	'needless to say',
+	'in order to',
+	'serves as',
+	'stands as',
+	'experts (?:say|believe|agree|suggest)',
+	'industry reports suggest',
+	'some critics argue',
+	'studies show',
+	'i hope this helps',
+	'let me know if',
+	'great question',
+	'happy to help',
+	'you(?:\'re| are) absolutely right',
+	'the future looks',
+	'could potentially',
+	'north star',
+	'gold-plating',
+	'cutting-edge',
+	'state-of-the-art',
+	'setting the stage for',
+	'indelible mark',
+	'deeply rooted',
+	'in the event that',
+	'smoking gun',
+	'must-visit',
+	// Single words.
+	'crucial',
+	'pivotal',
+	'delv(?:e|es|ed|ing)',
+	'testament',
+	'underscor(?:e|es|ed)',
+	'showcas(?:e|es|ed|ing)',
+	'tapestry',
+	'vibrant',
+	'seamless(?:ly)?',
+	'robust',
+	'groundbreaking',
+	'renowned',
+	'breathtaking',
+	'nestled',
+	'myriad',
+	'plethora',
+	'realm',
+	'landscape',
+	'interplay',
+	'intricate',
+	'garner(?:s|ed|ing)?',
+	'foster(?:s|ed|ing)?',
+	'holistic',
+	'paradigm',
+	'substrate',
+	'bedrock',
+	'flywheel',
+	'nexus',
+	'endgame',
+	'modality',
+	'boasts',
+	'leverag(?:e|es|ed|ing)',
+	'streamlin(?:e|es|ed|ing)',
+	'empower(?:s|ed|ing)?',
+	'additionally',
+	'enduring',
+	'enhanc(?:e|es|ed|ing|ement)',
+	'stunning',
+	'facilitat(?:e|es|ed|ing)',
+	'numerous',
+	'utiliz(?:e|es|ed|ing)',
+];
+
+const SLOP = new RegExp(`\\b(?:${SLOP_PHRASES.join('|')})\\b`, 'gi');
+/** "Not just faster, but cheaper." The shape, not any one word in it. */
+const NOT_JUST = /\bnot just\b[^.!?]{1,60}?\bbut\b/gi;
+
+/** Every slop hit in the answer, lowercased, in the order they appear. */
+export function slopPhrases(prose: string): string[] {
+	return [...(prose.match(SLOP) ?? []), ...(prose.match(NOT_JUST) ?? [])].map((hit) =>
+		hit.toLowerCase().replace(/\s+/g, ' '),
+	);
 }
 
 /**
@@ -321,6 +435,7 @@ export function measure(raw: string): Metrics {
 			maxParagraphSentences: 0,
 			tenseViolations: 0,
 			synonymDrift: 0,
+			slop: [],
 		};
 	}
 
@@ -338,5 +453,6 @@ export function measure(raw: string): Metrics {
 		maxParagraphSentences: maxParagraphSentences(raw),
 		tenseViolations: tenseViolations(text),
 		synonymDrift: synonymDrift(text),
+		slop: slopPhrases(text),
 	};
 }

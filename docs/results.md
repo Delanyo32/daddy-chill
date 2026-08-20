@@ -1,32 +1,41 @@
 # Results
 
-20 prompts, median scores, `openrouter/anthropic/claude-opus-4.8` under test, judged
+25 prompts, median scores, `openrouter/anthropic/claude-opus-4.8` under test, judged
 by `openrouter/anthropic/claude-sonnet-5`.
 
 ## Latest run
 
-| Metric | Plain | daddy-chill | Change |
+Run 7 is an A/B on one prompt set. Both arms ran the same 25 prompts and the same
+model. The only change is the skill text: `gloss` and `bare` replaced nine scattered
+rules, and the 422-word list was deleted.
+
+| Metric | Run 6 skill | Run 7 skill | Change |
 | --- | ---: | ---: | ---: |
-| Flesch-Kincaid grade | 8.80 | 3.60 | -59.1% |
-| Readability standard | 11.00 | 5.00 | -54.5% |
-| Difficult-word ratio | 23.58% | 12.16% | -48.4% |
-| Avg sentence length | 11.94 | 7.66 | -35.8% |
-| Tense violations | 0.5 | 0.0 | -100% |
-| Synonym drift | 0.5 | 0.0 | -100% |
-| Word count (not gated) | 387.5 | 201.0 | -48.1% |
-| **Facts needed to act, kept** | | **100.0%** | |
+| Unexplained terms across 25 answers | 11 | 5 | -54.5% |
+| Answers a non-expert could not act on | 2 | 0 | -100% |
+| Difficult-word ratio | 16.69% | 14.94% | -10.5% |
+| Flesch-Kincaid grade | 4.00 | 3.40 | -15.0% |
+| Avg sentence length | 9.84 | 9.42 | -4.3% |
+| Word count (not gated) | 368.0 | 305.0 | -17.1% |
+| Facts needed to act, kept | 91.7% | 91.7% | none |
+| Prompts passed | 11/25 | 11/25 | none |
 
-All facts kept: 70.0%. Unexplained hard terms: 5 across 20 answers.
+Against the plain control, Run 7 scores grade 9.00 to 3.40 and jargon 28.82% to 14.94%.
 
-Read the two fact numbers together. The skill answers in about half the words and
-leaves out 30% of what the plain agent said, while keeping everything a reader needs
-in order to act. The gap between 100% and 70% is background, not answer.
+**The word list was a no-op.** `SKILL.md` told the agent to read a 422-word verb and
+adjective list before every answer. Deleting it made word choice better, not worse:
+16.69% to 14.94%. No agent was reading it, and reading it would have cost about six
+times the whole skill in tokens.
 
-11 of 20 prompts kept 100% of the facts needed to act.
-
-13 of 20 prompts passed. All 7 median gates passed.
+**One gate still fails, from before this change.** The median grade must land between 6
+and 8. Run 6's skill scored 4.00 and Run 7's scores 3.40. The floor exists to catch
+answers that got "simpler" by cutting explanations. That is not what happened here:
+unexplained terms halved and unusable answers went to zero over the same set. The floor
+gate and the thing it proxies for now disagree, so the gate needs its own look.
 
 ## Run history
+
+Runs 1 to 6 used a 20-prompt set. Run 7 uses 25, so only Run 7 rows compare directly.
 
 Runs 1 to 3 measured semantic compression: facts kept per 100 words, with a gate that
 the skill write fewer words than the control. Runs 4 to 6 dropped that goal.

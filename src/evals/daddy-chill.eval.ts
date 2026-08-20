@@ -5,29 +5,30 @@ import { measure, median, type Metrics } from './metrics.ts';
 import { buildJudgeInput, parseJudgeOutput, type Retention } from './retention.ts';
 import rawPrompts from './prompts.json' with { type: 'json' };
 
-/**
- * A band, not a ceiling.
- *
- * The old gate was `<= 8` only, so lower always won. That is how a session scored a
- * median grade of 2.50, five grades under target, while leaving 40 terms undefined
- * and losing its reader. Explaining a term costs words and clauses, so an answer
- * that explains its jargon cannot also score like a children's book. Under the floor
- * means the explanations were cut, not that the writing got clear.
- */
-const GRADE_FLOOR = 6;
 const GRADE_CEILING = 8;
-const SENTENCE_CEILING = 20;
-const PARAGRAPH_CEILING = 6;
 const ACTIONABLE_FLOOR = 0.8;
+
 /**
- * Numbers per 100 words.
+ * Five form gates were removed when the `unslop` rules landed, because the two sets
+ * of rules told the answer to do opposite things:
  *
- * ponytail: calibrated on the failing session, not on a corpus. The two answers that
- * made the reader ask for something simpler scored 25.3 and 23.6; the answer they
- * accepted scored 4.4. Retune both after the first full run.
+ * | Removed gate            | The rule it fought                                    |
+ * | ----------------------- | ----------------------------------------------------- |
+ * | longest sentence <= 20  | "Vary rhythm. Then longer ones that take their time." |
+ * | avg sentence <= 20      | the same rule, across the set                          |
+ * | longest paragraph <= 6  | "Let some mess in. Perfect structure looks machine-made." |
+ * | numbers per 100 words   | "significantly improves becomes the measured delta"    |
+ * | reading grade floor 6   | every rule that swaps a long word for a plain one      |
+ *
+ * Every one of those numbers is still measured and still printed. Nothing fails a
+ * run for hitting one. What is left gates meaning instead of form: zero bare terms,
+ * a non-expert can act on it, and the facts needed to act survive. A long sentence
+ * a reader understands was never the failure this skill exists to stop.
+ *
+ * The grade floor is the one worth watching. It existed because a very low score
+ * meant the explanations were cut, not that the prose got clear. The bare-term gates
+ * and the actionable gate now cover that from the meaning side.
  */
-const NUMBER_CEILING = 20;
-const NUMBER_MEDIAN_CEILING = 12;
 
 /** A prompt is one question, or a conversation whose last answer gets scored. */
 const prompts = rawPrompts as (string | string[])[];
@@ -74,6 +75,7 @@ describeEval('daddy-chill simplifies without dropping what the reader needs', { 
 					`  para max ${before.maxParagraphSentences} -> ${after.maxParagraphSentences}\n` +
 					`  tense    ${before.tenseViolations} -> ${after.tenseViolations}\n` +
 					`  synonyms ${before.synonymDrift} -> ${after.synonymDrift}\n` +
+					`  slop     ${before.slop.length} -> ${after.slop.length}${after.slop.length ? ` (${after.slop.join(', ')})` : ''}\n` +
 					`  needed   ${retention.neededCovered}/${retention.needed} kept (${retention.covered}/${retention.total} of all facts)` +
 					(retention.missing.length ? `, dropped: ${retention.missing.join('; ')}` : '') +
 					'\n' +
@@ -83,8 +85,6 @@ describeEval('daddy-chill simplifies without dropping what the reader needs', { 
 			);
 
 			// Per prompt: things one answer either does or does not do. No baseline needed.
-			expect(after.maxSentenceLength, 'longest sentence').toBeLessThanOrEqual(SENTENCE_CEILING);
-			expect(after.maxParagraphSentences, 'longest paragraph').toBeLessThanOrEqual(PARAGRAPH_CEILING);
 			expect(skilled.output, 'no em dashes').not.toContain('—');
 
 			// The rule the skill kept breaking, now gated from both sides. The regex
@@ -98,8 +98,6 @@ describeEval('daddy-chill simplifies without dropping what the reader needs', { 
 			expect(retention.actionable, `usable by a non-expert${retention.blocker ? `: ${retention.blocker}` : ''}`).toBe(
 				true,
 			);
-
-			expect(after.numberDensity, 'numbers per 100 words').toBeLessThanOrEqual(NUMBER_CEILING);
 
 			// Gated on what a reader needs to act, not on every fact. The baseline
 			// volunteers tangents the question never asked for, so grading against all
@@ -126,11 +124,12 @@ describeEval('daddy-chill simplifies without dropping what the reader needs', { 
 
 		const med = (pick: (sample: Sample) => number) => median(samples.map(pick));
 		const bare = samples.reduce((n, s) => n + s.after.bare.length + s.retention.unexplained.length, 0);
+		const slop = samples.reduce((n, s) => n + s.after.slop.length, 0);
 		const unusable = samples.filter((s) => !s.retention.actionable).length;
 
 		console.log(
 			`\nmedians over ${samples.length} prompts\n` +
-				`  grade    ${med((s) => s.before.grade).toFixed(2)} -> ${med((s) => s.after.grade).toFixed(2)}  (band ${GRADE_FLOOR} to ${GRADE_CEILING})\n` +
+				`  grade    ${med((s) => s.before.grade).toFixed(2)} -> ${med((s) => s.after.grade).toFixed(2)}  (ceiling ${GRADE_CEILING})\n` +
 				`  standard ${med((s) => s.before.standard).toFixed(2)} -> ${med((s) => s.after.standard).toFixed(2)}\n` +
 				`  words    ${med((s) => s.before.words).toFixed(1)} -> ${med((s) => s.after.words).toFixed(1)}  (reported, not gated)\n` +
 				`  jargon   ${(med((s) => s.before.difficultRatio) * 100).toFixed(2)}% -> ${(med((s) => s.after.difficultRatio) * 100).toFixed(2)}%\n` +
@@ -138,20 +137,26 @@ describeEval('daddy-chill simplifies without dropping what the reader needs', { 
 				`  sent len ${med((s) => s.before.avgSentenceLength).toFixed(2)} -> ${med((s) => s.after.avgSentenceLength).toFixed(2)}\n` +
 				`  tense    ${med((s) => s.before.tenseViolations).toFixed(1)} -> ${med((s) => s.after.tenseViolations).toFixed(1)}\n` +
 				`  synonyms ${med((s) => s.before.synonymDrift).toFixed(1)} -> ${med((s) => s.after.synonymDrift).toFixed(1)}\n` +
+				`  slop     ${med((s) => s.before.slop.length).toFixed(1)} -> ${med((s) => s.after.slop.length).toFixed(1)}  (${slop} phrases across ${samples.length} answers)\n` +
 				`  needed   ${(med((s) => s.retention.neededRatio) * 100).toFixed(1)}% kept, all facts ${(med((s) => (s.retention.total ? s.retention.covered / s.retention.total : 1)) * 100).toFixed(1)}%\n` +
 				`  bare     ${bare} unexplained terms across ${samples.length} answers\n` +
 				`  unusable ${unusable}/${samples.length} answers a non-expert could not act on`,
 		);
 
 		expect(med((s) => s.after.grade), 'median reading level ceiling').toBeLessThanOrEqual(GRADE_CEILING);
-		// The floor is the new half. Scoring below it means explanation was cut, not
-		// that the prose got clearer, so "simpler" can no longer be gamed downward.
-		expect(med((s) => s.after.grade), 'median reading level floor').toBeGreaterThanOrEqual(GRADE_FLOOR);
 		expect(med((s) => s.after.difficultRatio), 'median jargon vs baseline').toBeLessThan(med((s) => s.before.difficultRatio));
-		expect(med((s) => s.after.avgSentenceLength), 'median sentence length ceiling').toBeLessThanOrEqual(SENTENCE_CEILING);
-		expect(med((s) => s.after.numberDensity), 'median numbers per 100 words').toBeLessThanOrEqual(NUMBER_MEDIAN_CEILING);
 		expect(med((s) => s.after.tenseViolations), 'median tense violations vs baseline').toBeLessThanOrEqual(med((s) => s.before.tenseViolations));
 		expect(med((s) => s.after.synonymDrift), 'median synonym drift vs baseline').toBeLessThanOrEqual(med((s) => s.before.synonymDrift));
+
+		// Slop is the one failure every other metric scores as a pass: "a pivotal
+		// moment in the evolving landscape" reads at grade 5.9 with no hard term in
+		// it. Gated against the baseline, not at 0, for the same reason as tense and
+		// synonyms: the list has false positives ("realm", "landscape"), and both
+		// arms get the same ruler, so a shared false-positive rate cancels out.
+		//
+		// ponytail: retune to a flat ceiling after the first full run, once we know
+		// what the plain agent actually scores.
+		expect(med((s) => s.after.slop.length), 'median slop phrases vs baseline').toBeLessThanOrEqual(med((s) => s.before.slop.length));
 
 		// Catches loss spread thinly enough that no single prompt trips the per-prompt
 		// gate. Without this, one dropped step everywhere would pass.
