@@ -12,13 +12,17 @@ Two arms, identical except for one thing, plus a judge that scores both.
 | `daddy-chill` | daddy-chill | treatment |
 | `judge` | none | the ruler |
 
-Each of the 20 prompts in `src/evals/prompts.json` runs through both arms. Then
+Each of the 25 prompts in `src/evals/prompts.json` runs through both arms. Then
 [`text-readability`](https://github.com/clearnote01/readability) scores each answer
 and the judge scores what survived.
 
-Prompts 1 to 10 are technical questions. Prompts 11 to 15 test writing: emails,
-updates, guides, rewrites, and review comments. Prompts 16 to 20 test procedures,
-which is what STE was built for.
+| Prompts | What they test |
+| --- | --- |
+| 1 to 10 | technical questions |
+| 11 to 15 | writing: emails, updates, guides, rewrites, review comments |
+| 16 to 20 | procedures, which is what STE was built for |
+| 21 to 22 | raw measurements the answer has to explain |
+| 23 to 25 | multi-turn conversations, where a session-start rule has time to drift |
 
 The judge model is pinned separately. `JUDGE_MODEL` defaults to Sonnet 5 and does not
 follow `EVAL_MODEL`, because benchmarking a different model must not also move the
@@ -61,7 +65,7 @@ thinly across every prompt.
 
 ## Median gates
 
-Reading level swings with the question, so these run across all 20 prompts at once.
+Reading level swings with the question, so these run across all 25 prompts at once.
 
 | Metric | Gate | What it catches |
 | --- | --- | --- |
@@ -233,10 +237,9 @@ The answer they accepted scored 4.4. Those numbers are the reason to keep printi
 
 ## Unit tests
 
-`pnpm test` runs 43 tests against the scoring code with no API key and no model calls.
-Every metric is a pure function with a fixture. It covers the markdown-to-prose
-conversion, each new STE metric, the median, the judge output parser, and the
-rules-drift check.
+`pnpm test` runs the scoring tests with no API key and no model calls. Every metric is
+a pure function with a fixture. The tests cover the markdown-to-prose conversion, each
+STE metric, the median, the judge output parser, and the rules-drift check.
 
 A garbled judge reply throws rather than scoring zero, because a silent 0 would read
 as "the skill dropped every fact" and fail the wrong thing.

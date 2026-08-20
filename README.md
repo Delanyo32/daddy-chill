@@ -16,17 +16,17 @@ aircraft maintenance manuals.
 It simplifies the writing, not the answer. A term that cannot be swapped for an
 easy word stays exact, and gets explained in plain words next to it.
 
-Latest run, 20 prompts, median, against an unskilled control:
+Latest run, 25 prompts, median, against an unskilled control:
 
 | | Plain | daddy-chill |
 | --- | ---: | ---: |
-| Flesch-Kincaid grade | 8.80 | **3.60** |
-| Difficult-word ratio | 23.58% | **12.16%** |
-| Facts needed to act, kept | | **100%** |
+| Flesch-Kincaid grade | 9.00 | **3.40** |
+| Difficult-word ratio | 28.82% | **14.94%** |
+| Facts needed to act, kept | | **91.7%** |
 
-It halves the reading level and keeps everything the reader needs to act.
-Word count is measured but not gated: a clear answer is allowed to be longer.
-[Full results](docs/results.md).
+It cuts the reading level by more than half. No answer in that run left a reader
+unable to act, against 2 in the run before it. Word count is measured but not
+gated: a clear answer is allowed to be longer. [Full results](docs/results.md).
 
 ## Install
 
@@ -91,7 +91,7 @@ the judge separately and does not follow `EVAL_MODEL`.
 | `src/shared/rules.ts` | the same rules, for the benchmark agent |
 | `src/agents/` | `plain` (control), `daddy-chill` (treatment), `judge` (the ruler) |
 | `src/evals/` | prompts, metrics, and the benchmark |
-| `hooks/`, `commands/`, `runtime/` | always-on activation, per CLI. Session start sends the rules once. Every turn after that sends a short nudge to apply them and self-check, so long sessions do not drift and do not pay the full rules each message. |
+| `hooks/`, `commands/`, `runtime/` | always-on activation, per CLI. Session start sends the rules once, then every turn sends a short nudge instead, so long sessions do not drift and do not pay the full rules each message. |
 | `install.mjs` | the cross-CLI installer |
 
 ## Docs

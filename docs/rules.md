@@ -184,16 +184,23 @@ half. See [what the benchmark checks](./benchmark.md).
 
 Session start sends the whole skill. Every turn after that sends this instead:
 
-> Daddy Chill is on. The full rules went out at the start of this session. Apply them
-> to this answer. Before you send, check the answer against every rule: answer first,
-> no bare terms, exact code, plain words, active voice, no em dash, no slop.
+> Daddy Chill is on. The full rules went out at the start of this session. Apply them to this answer.
+>
+> Before you send, check the answer against every rule:
+> - Answer first.
+> - No bare terms. Gloss each hard term on first use.
+> - Keep code, commands, paths, and config keys exact.
+> - Plain words. Active voice. No em dash.
+> - No slop. Cut puffery, filler, hedging, and the closing summary.
+>
+> If you cannot recall a rule, re-read the Daddy Chill rules before you answer.
 
 The hooks used to re-send the rules on every message, because after ten tool calls the
 session-start copy is tens of thousands of tokens back in the transcript and the style
 drifts. That worked, and it cost the full rules every message.
 
-The nudge is 461 characters. The rules are 9,480. The copy is still in the transcript,
-so the nudge points at it instead of repeating it.
+The nudge is 461 characters. The session-start payload is 9,593. The copy is still in
+the transcript, so the nudge points at it instead of repeating it.
 
 `getTurnReminder` in `runtime/instructions.mjs` holds the text. Three hooks call it:
 `claude-prompt-submit.mjs`, `copilot-prompt-submit.mjs`, and `gemini-before-agent.mjs`.
@@ -265,7 +272,7 @@ section is verbatim.
 
 ### What it costs
 
-`SKILL.md` went from 484 words to 1,541.
+`SKILL.md` went from 484 words to about 1,550.
 
 At the time, the hooks re-sent the whole file on every turn, so that was about 1,400
 extra tokens per message. That is what killed the 422-word approved-words list once
