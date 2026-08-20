@@ -39,6 +39,9 @@ not a target.
 - **The 900-word dictionary.** Too big for a prompt, and most of it is aerospace
   vocabulary. The skill says "use plain words" and lists a few common swaps instead.
   Add the dictionary if word choice turns out to be what fails.
+  A 422-word verb and adjective subset shipped for one version and was removed. The
+  skill told the agent to read it before every answer, which no agent did, and which
+  would have cost six times the whole skill in tokens if one had.
 - **The 20 vs 25 word split.** The skill uses one flat 20-word limit. Two limits are
   harder to follow than one, and the agent would have to classify its own sentences
   first.
@@ -61,11 +64,10 @@ the answer explained a term in the sentence that used it.
 
 | Tier | Contains | Rank |
 | --- | --- | --- |
-| **Never break these** | answer first, explain every hard term, idea before number, explain column labels, warning first, everything needed to act | wins every conflict |
+| **Gloss every term** | answer first, gloss every hard term, idea before number, gloss column labels, warning first, everything needed to act | wins every conflict |
 | **Style** | sentence length, paragraph length, tenses, synonyms, noun stacks, active voice, em dashes | never wins against the tier above |
 
-One line makes the tie-break explicit: **never drop an explanation to keep a sentence
-short. Write two sentences.**
+One line makes the tie-break explicit: **write two sentences rather than drop a gloss.**
 
 ## The checklist used to undercut the rule
 

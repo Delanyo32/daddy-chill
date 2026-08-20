@@ -91,7 +91,7 @@ the judge separately and does not follow `EVAL_MODEL`.
 | `src/shared/rules.ts` | the same rules, for the benchmark agent |
 | `src/agents/` | `plain` (control), `daddy-chill` (treatment), `judge` (the ruler) |
 | `src/evals/` | prompts, metrics, and the benchmark |
-| `hooks/`, `commands/`, `runtime/` | always-on activation, per CLI |
+| `hooks/`, `commands/`, `runtime/` | always-on activation, per CLI. The rules are re-sent on every turn, not once per session, so long sessions do not drift. |
 | `install.mjs` | the cross-CLI installer |
 
 ## Docs
